@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Run-mode labels (shared by Home + Settings) -->
+    <string name="lz_mode_normal">Normal mode</string>
+    <string name="lz_mode_shizuku">Shizuku/ADB</string>
+    <string name="lz_mode_root">Root</string>
+    <!-- Bottom navigation -->
+    <string name="lz_nav_home">Home</string>
+    <string name="lz_nav_space">Spaces</string>
+    <string name="lz_nav_files">Files</string>
+    <string name="lz_nav_settings">Settings</string>
+    <!-- Main space display name (data layer) -->
+    <string name="lz_space_main_name">Main space</string>
+</resources>

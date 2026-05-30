@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SpaceViewModel: status chip text -->
+    <string name="lz_vm_chip_frozen">Frozen</string>
+    <string name="lz_vm_chip_running">Running</string>
+    <string name="lz_vm_chip_cloned">Cloned</string>
+    <string name="lz_vm_chip_not_cloned">Not cloned</string>
+
+    <!-- SpaceViewModel: batch progress -->
+    <string name="lz_vm_batch_progress">Processing %1$d/%2$d…</string>
+
+    <!-- SpaceViewModel: provisioning in-progress feedback -->
+    <string name="lz_vm_creating_space">Creating dual space…</string>
+    <string name="lz_vm_deleting_space">Deleting dual space…</string>
+    <string name="lz_vm_default_space_name">Dual space</string>
+
+    <!-- ActionFeedback: files import -->
+    <string name="lz_vm_files_imported">Imported %1$d files</string>
+    <string name="lz_vm_files_import_all_failed">Import failed: %1$d files could not be imported</string>
+    <string name="lz_vm_files_import_partial">Import finished: %1$d succeeded, %2$d failed</string>
+    <string name="lz_vm_files_import_detailed">Import finished: %1$d succeeded, %2$d skipped (over limit), %3$d failed</string>
+
+    <!-- ActionFeedback: batch actions -->
+    <string name="lz_vm_batch_freeze_ok">Froze %1$d apps</string>
+    <string name="lz_vm_batch_freeze_partial">Freeze finished: %1$d succeeded, %2$d failed</string>
+    <string name="lz_vm_batch_uninstall_ok">Uninstalling %1$d apps</string>
+    <string name="lz_vm_batch_uninstall_partial">Uninstall started: %1$d succeeded, %2$d failed</string>
+    <string name="lz_vm_batch_clone_ok">Cloning %1$d apps to the dual space</string>
+    <string name="lz_vm_batch_clone_partial">Clone started: %1$d succeeded, %2$d failed</string>
+
+    <!-- ProvisioningFeedback: create -->
+    <string name="lz_vm_create_success">A new dual space has been created</string>
+    <string name="lz_vm_create_root_unavailable">Root access is required to create a space; please enable Root in Settings first</string>
+    <string name="lz_vm_create_cap_reached">Reached this device\'s space limit (up to %1$d users); cannot create more</string>
+    <string name="lz_vm_create_managed_profile_limit">This device only allows one dual space (the system work-profile limit has been reached); cannot create more</string>
+    <string name="lz_vm_create_failed">Failed to create space: %1$s. You can retry</string>
+
+    <!-- ProvisioningFeedback: delete -->
+    <string name="lz_vm_delete_success">The dual space has been deleted</string>
+    <string name="lz_vm_delete_root_unavailable">Normal mode cannot directly delete the dual space. Remove the work profile in system Settings, or enable Root for one-tap deletion.</string>
+    <string name="lz_vm_delete_failed">Failed to delete space: %1$s. The space was not destroyed; you can retry</string>
+
+    <!-- Shared fallback for unknown reasons -->
+    <string name="lz_vm_unknown_error">Unknown error</string>
+
+    <!-- DestroyProfileFeedback -->
+    <string name="lz_vm_destroy_in_progress">Deleting dual space…</string>
+    <string name="lz_vm_destroy_not_profile_owner">No management permission; the dual space must be removed manually in system Settings</string>
+    <string name="lz_vm_destroy_failed">Deletion failed: %1$s. The space was not destroyed; you can retry</string>
+
+    <!-- LaunchFeedback -->
+    <string name="lz_vm_launch_space_not_ready">The dual space is not ready yet; check the space status or permission mode in Settings</string>
+    <string name="lz_vm_launch_app_missing">%1$s has no launchable entry in this space</string>
+    <string name="lz_vm_launch_denied">No permission to access this space; please check the permission mode</string>
+    <string name="lz_vm_launch_unknown">Could not launch %1$s: %2$s</string>
+
+    <!-- PrismSettingsModeState: mode cards -->
+    <string name="lz_vm_mode_normal_title">Normal mode</string>
+    <string name="lz_vm_mode_normal_status">Available</string>
+    <string name="lz_vm_mode_normal_summary">Dual spaces, opening apps, freezing, pausing, and basic file import/export do not require Root.</string>
+    <string name="lz_vm_mode_shizuku_title">Shizuku mode</string>
+    <string name="lz_vm_mode_shizuku_summary_ready">Can be used for enhanced copying, background restrictions, and more system queries.</string>
+    <string name="lz_vm_mode_shizuku_summary_waiting">Shizuku is connected but still needs to authorize PrismSpace.</string>
+    <string name="lz_vm_mode_shizuku_summary_not_running">Start Shizuku or wireless debugging to enable enhanced capabilities.</string>
+    <string name="lz_vm_mode_shizuku_summary_not_installed">Shizuku was not detected; standard dual-open features still work.</string>
+    <string name="lz_vm_mode_root_title">Root mode</string>
+    <string name="lz_vm_mode_root_summary">Root is only used for advanced diagnostics and fallback maintenance; it is not required for standard dual-open features.</string>
+
+    <!-- PrismShizukuAdbStatus labels -->
+    <string name="lz_vm_shizuku_status_not_installed">Not installed</string>
+    <string name="lz_vm_shizuku_status_not_running">Not running</string>
+    <string name="lz_vm_shizuku_status_waiting">Waiting for authorization</string>
+    <string name="lz_vm_shizuku_status_ready">Available</string>
+
+    <!-- PrismRootStatus labels -->
+    <string name="lz_vm_root_status_not_detected">Not detected</string>
+    <string name="lz_vm_root_status_available_disabled">Available but off</string>
+    <string name="lz_vm_root_status_enabled">Enabled</string>
+</resources>

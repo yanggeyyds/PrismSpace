@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">棱镜空间</string>
+    <string name="prism_profile_entry_label">棱镜-双开空间</string>
+    <string name="label_searchable">双开空间中的应用</string>
+
+
+    <string name="prism_home_status_ready_title">双开空间正常</string>
+    <string name="prism_home_status_missing_title">双开空间未就绪</string>
+    <string name="prism_home_status_paused_title">双开空间已暂停</string>
+    <string name="prism_home_status_ready_body">可以复制、打开和管理双开空间里的应用。</string>
+    <string name="prism_home_status_missing_body">需要创建或修复工作资料后才能复制应用。</string>
+    <string name="prism_home_status_paused_body">恢复双开空间后才能打开其中的应用。</string>
+    <string name="prism_home_add_app">添加应用</string>
+    <string name="prism_home_action_create_or_repair">创建或修复双开空间</string>
+    <string name="prism_home_action_open_diagnostics">打开诊断</string>
+    <string name="prism_settings_open_shizuku">打开 Shizuku</string>
+
+
+
+
+    <!-- Compose setup wizard strings -->
+    <string name="prism_setup_hero_title">欢迎使用 PrismSpace</string>
+    <string name="prism_setup_hero_body">在同一台设备上安全运行另一份独立的应用副本。</string>
+    <string name="prism_setup_features_title">主要功能</string>
+    <string name="prism_setup_feature_clone_title">应用克隆</string>
+    <string name="prism_setup_feature_clone_body">把已安装的应用复制到独立的双开空间，数据互不干扰。</string>
+    <string name="prism_setup_feature_isolation_title">数据隔离</string>
+    <string name="prism_setup_feature_isolation_body">双开空间使用独立的账号和存储，与主空间应用相互隔离。</string>
+    <string name="prism_setup_feature_files_title">跨空间文件</string>
+    <string name="prism_setup_feature_files_body">在主空间与双开空间之间，按需安全地传输文件。</string>
+    <string name="prism_setup_privacy_title">工作原理 · 隐私</string>
+    <string name="prism_setup_privacy_body">PrismSpace 通过 Android 工作资料创建双开空间。应用双开、安装和文件传输等核心流程在设备本地完成；检查更新、PrismProbe 网络测试和诊断分享只会在你主动使用时发起。</string>
+    <string name="prism_setup_cta_primary">开始创建双开空间</string>
+    <string name="prism_setup_cta_help">遇到问题？</string>
+    <string name="prism_setup_error_title">无法继续</string>
+    <string name="dialog_root_setup_profile_exists">设备上已存在 PrismSpace 双开空间。如需重新创建，请先在主空间中删除已有的双开空间，然后再次尝试设置。</string>
+    <string name="setup_root_profile_progress">正在创建双开空间…</string>
+    <string name="setup_error_managed_profile_not_supported">抱歉，此设备不支持必需的“Android 工作资料”特性。</string>
+    <string name="setup_error_provisioning_incomplete">双开空间的创建不完整，此前的创建尝试可能并未成功。\n\n<b>如果您的设备或其它三方工具施加了“自启动”（或类似的）限制，请务必首先将棱镜空间解除限制或加入白名单，然后再次创建双开空间。</b></string>
+    <string name="setup_error_managed_device">抱歉，由于此设备已被 <b>%1$s</b> 接管，双开空间无法创建。</string>
+    <string name="setup_error_missing_managed_provisioning">抱歉，由于此设备并未完整支持必需的“Android 工作资料”特性。</string>
+    <string name="setup_solution_for_cancelled_provision">创建双开空间遇到了困难？\n\n如果创建过程被中断，请重新进入系统创建流程，并确保棱镜空间允许后台启动。部分深度定制系统还需要先关闭电池优化或安全限制，然后再重试。\n\nRoot 创建只作为高级兜底路径，普通用户路径不依赖 Root。</string>
+
+
+    <string name="button_setup_help">创建帮助</string>
+    <string name="button_have_checked">我已检查</string>
+    <string name="button_setup_space_with_root">通过 ROOT 创建双开空间</string>
+    <string name="prism_help_setup_title">创建帮助</string>
+    <string name="prism_help_setup_body">棱镜空间通过 Android 工作资料创建独立的双开空间。\n\n如果创建失败，先检查这些项目：\n· 允许棱镜空间后台运行和自启动。\n· 系统创建页面工作时不要手动关闭。\n· 关闭安全中心或电池策略对棱镜空间的限制后重试。\n· Root 创建仅作为普通创建被系统拦截后的高级兜底。</string>
+    <string name="prism_help_clone_title">复制应用帮助</string>
+    <string name="prism_help_clone_body">复制应用需要 Android 的已安装应用复制能力、可用的系统应用商店、Shizuku/ADB 授权，或棱镜空间安装器模块。\n\n如果当前路径被系统拦截，请先在主空间安装目标应用后再次复制，或在设置里启用 Shizuku/ADB 模式。</string>
+    <string name="prism_help_main_space_title">管理主空间</string>
+    <string name="prism_help_main_space_body">管理主空间会让棱镜空间获得整机范围的管理能力，不只是双开空间能力。只有当你需要冻结主空间应用、或把 ADB 安全限制应用到整台设备时才需要启用。\n\n这是可选能力。复制和启动双开应用不需要管理主空间。</string>
+
+    <string name="action_rescind">撤销</string>
+
+
+
+    <string name="dialog_title_warning">注意</string>
+    <string name="dialog_reactivate_message">双开空间入口被意外关闭，请再次授予设备管理权限以重新开启。</string>
+    <string name="dialog_destroy_message">确定要删除整个双开空间？其中的应用副本和所有数据将被永久删除，无法恢复。\n\n主空间的应用和数据不会受到影响。</string>
+    <string name="dialog_destroy_message_for_managed_user">如果“主空间”也由棱镜空间管理，由于 Android 系统施加的限制，您将无法再创建新的双开空间，除非撤销对“主空间”的管理权。\n\n确定仍要删除此双开空间？</string>
+    <string name="dialog_rescind_message">确定要撤销对“主空间”的管理权？\n\n将来若希望重新启用，必须再一次完成必要的流程。如果没有 ROOT 权限，届时需要删除现有的双开空间（如果已创建）并退出设备上登录的所有账号。</string>
+    <string name="dialog_cannot_destroy_message">如果要删除整个双开空间，请打开系统设置 -（用户和）账号，点选“移除工作资料”。</string>
+    <string name="dialog_critical_app_warning">这个应用（或组件）可能对于 Android 系统或其它应用的正常运作至关重要。如果继续此操作，部分应用甚至整个系统可能因此变得不稳定或无法正常运作。\n\n确认继续？</string>
+    <string name="dialog_space_setup_failed">抱歉，创建双开空间时出现了异常。（阶段 %1$d）</string>
+
+    <string name="action_continue">继续</string>
+    <string name="action_destroy">删除</string>
+
+    <string name="prompt_disable_sys_app_as_removal">系统应用（或组件）只能被停用，与卸载安装的应用效果相似。\n\n由于没有权限直接停用应用，接下来即将打开系统的应用设置界面，届时请点击“停用”按钮。</string>
+    <string name="toast_enable_disabled_system_app">请重新启用此分身</string>
+
+    <string name="toast_successfully_cloned">%1$s 已完成分身</string>
+    <string name="toast_cannot_clone">抱歉，无法为 %1$s 分身。</string>
+    <string name="toast_shortcut_failed">快捷方式创建失败</string>
+    <string name="toast_error_freeze_failure">冻结失败</string>
+    <string name="toast_error_unfreeze_failure">解冻失败</string>
+    <string name="toast_error_freezing_active_admin">无法冻结已激活设备管理器的应用</string>
+    <string name="toast_app_launch_failure">未能启动 %s</string>
+    <string name="prompt_activating_space">正在启用双开空间…</string>
+    <string name="prompt_activate_space_first">请先启用双开空间…</string>
+    <string name="prompt_invalid_shortcut">快捷方式已失效，请重新创建</string>
+
+    <!-- General words -->
+    <string name="open_settings">打开系统设置</string>
+    <string name="prompt_space_not_ready">双开空间尚未就绪。请打开设置检查创建状态或权限模式。</string>
+
+    <!-- Settings -->
+
+
+
+
+
+
+
+    <!-- Security Confirmation -->
+
+    <string name="toast_security_confirmation_failure">安全确认失败，请重试。</string>
+
+    <!-- New User Guide -->
+
+
+    <!-- Tip cards -->
+
+
+    <!-- Language picker (i18n) -->
+    <string name="prism_settings_language">语言</string>
+    <string name="prism_language_system">跟随系统</string>
+    <string name="prism_language_zh">简体中文</string>
+    <string name="prism_language_en">English</string>
+    <!-- Chinese for the new PrismSpace strings whose English default lives in values/ -->
+    <string name="toast_clone_root_unavailable">需要 Root 授权才能自动克隆。请在设置中启用 Root，或改用 Shizuku / Play / 文件方式。</string>
+    <string name="toast_clone_file_sync_transferring">正在把安装包传输到双开空间…</string>
+    <string name="dialog_title_clone_file_sync">安装包已复制到双开空间</string>
+    <string name="dialog_clone_file_sync_done">完整安装包已复制到双开空间的 Download/PrismSpace。打开双开空间安装入口后，用 Android 系统安装器确认安装。若要从系统文件管理器直接安装单个 APK，请先允许文件管理器安装未知应用。</string>
+</resources>

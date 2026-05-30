@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lz_io_no_file">未收到要导入的文件</string>
+    <string name="lz_io_cant_read">无法读取所选文件</string>
+    <string name="lz_io_cancelled">已取消导入</string>
+    <string name="lz_io_done">已保存：%1$s</string>
+    <string name="lz_io_failed">导入失败：%1$s</string>
+</resources>

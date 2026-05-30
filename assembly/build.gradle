@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+
+def prismApplicationId = "com.yzddmr6.prismspace"
+
+android {
+    namespace 'com.yzddmr6.prismspace'
+
+    compileSdk this.compileSdkVersion
+
+    defaultConfig {
+        applicationId prismApplicationId
+        minSdkVersion this.minSdkVersion
+        targetSdkVersion 35
+        resourceConfigurations += ['en', 'zh', 'zh-rTW']
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    buildFeatures.dataBinding true
+
+    buildTypes {
+        debug {}
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions += "packaging"
+    flavorDimensions += "distribution"
+
+    productFlavors {
+        complete { dimension "packaging" }
+        engine   { dimension "packaging" }  // Share application ID to retain the profile ownership when switching builds
+        mobile   { dimension "packaging"; applicationIdSuffix ".mobile" }
+
+        normal     { dimension "distribution" }
+        googleplay { dimension "distribution" }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        checkOnly 'NewApi'
+        abortOnError true
+        checkReleaseBuilds false
+        htmlReport false
+        xmlReport false
+        textReport true
+        textOutput file('stdout')
+    }
+}
+
+dependencies {
+    // Complete
+    completeImplementation project(':engine')
+    completeImplementation project(':mobile')
+    completeImplementation project(':installer')
+    completeImplementation project(':watcher')
+    completeImplementation project(':open')
+
+    // Engine only
+    engineImplementation project(':engine')
+    // Mobile only
+    mobileImplementation project(':mobile')
+}

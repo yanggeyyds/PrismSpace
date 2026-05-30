@@ -1,0 +1,40 @@
+<manifest xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <permission android:name="com.yzddmr6.prismspace.permission.INSTALLER" android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.yzddmr6.prismspace.permission.INSTALLER" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon" android:taskAffinity="">
+
+        <activity android:name=".AppInstallerActivity"
+                  android:label="@string/app_installer_label"
+                  android:configChanges="uiMode|orientation|screenSize|keyboard|keyboardHidden"
+                  android:excludeFromRecents="true"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:exported="false" />
+
+        <receiver android:name=".AppInstallerStatusReceiver" android:exported="false" />
+
+        <activity android:name=".AppInfoForwarderActivity"
+                  android:taskAffinity=""
+                  android:excludeFromRecents="true"
+                  android:relinquishTaskIdentity="true"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_APP_INFO" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".AppSettingsHelperService" android:exported="false">
+            <meta-data android:name="key" android:value="@string/setting_app_settings_helper" />
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.PersistentService" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

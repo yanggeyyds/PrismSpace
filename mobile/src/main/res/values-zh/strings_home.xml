@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- HomeScreen: 顶栏 + 内容描述 -->
+    <string name="lz_home_title">首页</string>
+    <string name="lz_home_about">关于</string>
+
+    <!-- HomeScreen: 状态主卡 -->
+    <string name="lz_home_loading">加载中…</string>
+    <string name="lz_home_repair_fallback">修复双开空间</string>
+
+    <!-- HomeScreen: 统计卡片 -->
+    <string name="lz_home_main_space">主空间</string>
+    <string name="lz_home_dual_space">双开空间</string>
+    <string name="lz_home_main_count">%1$d 应用</string>
+    <string name="lz_home_clone_count">%1$d 分身</string>
+
+    <!-- HomeScreen: 信息行 -->
+    <string name="lz_home_work_profile">工作资料</string>
+    <string name="lz_home_run_mode">运行模式</string>
+    <string name="lz_home_android_version">Android 版本</string>
+    <string name="lz_home_device">设备</string>
+
+    <!-- HomeViewModel: 状态标题 / 正文 / 标签 / 主按钮 -->
+    <string name="lz_home_status_normal_title">双开空间正常</string>
+    <string name="lz_home_status_normal_body">分身已就绪，随时可启动。</string>
+    <string name="lz_home_tag_normal">正常</string>
+    <string name="lz_home_label_add_app">克隆一个应用</string>
+
+    <string name="lz_home_status_notcreated_title">双开空间未创建</string>
+    <string name="lz_home_status_notcreated_body">请前往设置创建双开空间。</string>
+    <string name="lz_home_tag_notcreated">未创建</string>
+    <string name="lz_home_label_create">创建双开空间</string>
+
+    <string name="lz_home_status_suspended_title">双开空间已暂停</string>
+    <string name="lz_home_status_suspended_body">双开空间已暂停，分身应用暂不可用。</string>
+    <string name="lz_home_tag_suspended">已暂停</string>
+    <string name="lz_home_label_restore">恢复双开空间</string>
+
+    <string name="lz_home_status_locked_title">双开空间已锁定</string>
+    <string name="lz_home_status_locked_body">双开空间需先解锁（输入锁屏密码）后才能使用分身。</string>
+    <string name="lz_home_tag_locked">未解锁</string>
+    <string name="lz_home_label_unlock">前往解锁</string>
+
+    <string name="lz_home_status_needsrepair_title">双开空间需要修复</string>
+    <string name="lz_home_status_needsrepair_body">上次检测发现问题，请前往设置修复。</string>
+    <string name="lz_home_tag_needsrepair">需要修复</string>
+    <string name="lz_home_label_repair">修复双开空间</string>
+
+    <!-- HomeViewModel: 工作资料状态标签 -->
+    <string name="lz_home_profile_not_created">未创建</string>
+    <string name="lz_home_profile_suspended">已暂停</string>
+    <string name="lz_home_profile_ready">双开空间已就绪</string>
+</resources>

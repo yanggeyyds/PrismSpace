@@ -1,0 +1,21 @@
+<resources>
+    <string name="notification_space_watcher_title">%s 运转中</string>
+    <string name="notification_space_watcher_text_for_deactivate">“停用”可停止其中所有后台活动</string>
+    <string name="notification_space_watcher_text_for_restart">“重启”以回收其使用的资源.</string>
+    <string name="notification_app_watcher_title">%s 已解冻</string>
+    <string name="notification_app_watcher_text">点击将其冻结</string>
+    <string name="action_deactivate_space">停用</string>
+    <string name="action_restart_space">重启</string>
+    <string name="action_settings">设置</string>
+    <string name="action_dismiss">忽略</string>
+
+    <string name="toast_manual_quiet_mode">请在“工作资料设置”中手动关闭。</string>
+    <string name="notification_deactivating_clone_space">正在停用双开空间…</string>
+    <string name="prompt_space_deactivated">双开空间已停用</string>
+    <string name="prompt_failed_deactivating_space">双开空间停用失败</string>
+
+    <string name="notification_permission_was_granted_title">已授予权限“%s”</string>
+    <string name="notification_permission_was_granted_text">是否撤销此权限？</string>
+    <string name="action_revoke_granted">撤销</string>
+    <string name="action_keep_granted">保持授予</string>
+</resources>

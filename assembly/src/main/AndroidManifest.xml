@@ -1,0 +1,27 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:sharedUserId="com.yzddmr6.prismspace"
+    android:versionCode="1" android:versionName="0.0.1">
+
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
+
+        <!-- Ensure Run/Debug Configuration in Android Studio to work properly for module-assembly build -->
+        <activity android:name="com.yzddmr6.prismspace.MainActivity" />
+
+        <activity android:name="com.yzddmr6.prismspace.LauncherActivity"
+            android:exported="true"
+            android:directBootAware="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.yzddmr6.prismspace.category.PARENT_PROFILE" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

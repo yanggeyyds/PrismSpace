@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.yzddmr6.prismspace.engine'
+
+    compileSdk this.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion this.minSdkVersion
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    kotlinOptions.jvmTarget = "1.8"
+
+    buildFeatures { buildConfig = true }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        checkOnly 'NewApi'
+        abortOnError false
+        xmlReport false
+        textReport true
+        textOutput file('stdout')
+    }
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutine_version"
+    implementation 'androidx.core:core-ktx:1.10.1'      // ShortcutShuttle
+
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+}

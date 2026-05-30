@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Duplicate entries without "android" namespace are for AppCompat,
+         to be compatible with Android Design Support Library -->
+
+    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="materialAlertDialogTheme">@style/Theme.MaterialComponents.DayNight.Dialog.Alert</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="Theme.MaterialComponents">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+
+    <style name="AppThemeOverlay.Dark.Popup" parent="android:ThemeOverlay.Material.Dark">
+        <item name="android:colorBackground">?android:attr/colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.BorderlessActionButton" parent="android:Widget.Material.Button.Borderless.Colored">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/margin_small</item>
+        <item name="android:layout_marginEnd">@dimen/margin_small</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="SetupTheme" parent="AppTheme.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/prism_surface</item>
+    </style>
+
+    <style name="contentContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingBottom">@dimen/content_padding_bottom</item>
+        <item name="android:paddingStart">@dimen/content_padding_start_end</item>
+        <item name="android:paddingEnd">@dimen/content_padding_start_end</item>
+        <item name="android:paddingTop">@dimen/content_padding_top</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+        <item name="android:textSize">@dimen/content_text_size</item>
+    </style>
+    <style name="containerText">
+        <item name="android:textSize">@dimen/content_text_size</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+
+</resources>

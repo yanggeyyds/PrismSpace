@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Define standard dimensions to comply with Holo-style grids and rhythm. -->
+    <dimen name="margin_small">8dp</dimen>
+
+    <!-- Semantic definitions -->
+
+
+    <dimen name="app_icon_size">36dp</dimen>
+
+
+    <!-- Dimens used for setup content. -->
+    <dimen name="content_padding_bottom">24dp</dimen>
+    <dimen name="content_padding_start_end">40dp</dimen>
+    <dimen name="content_padding_top">34dp</dimen>
+    <dimen name="content_text_size">16sp</dimen>
+
+    <!-- Stretch the BottomNavigationView with only 2 tabs to full width. (480dp is the known max width among large phones) -->
+</resources>

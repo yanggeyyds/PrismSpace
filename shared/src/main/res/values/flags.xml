@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="until_api_24">true</bool>
+    <bool name="since_api_26">false</bool>
+    <bool name="since_api_28">false</bool>
+    <bool name="since_api_29">false</bool>
+    <bool name="since_api_31">false</bool>
+</resources>

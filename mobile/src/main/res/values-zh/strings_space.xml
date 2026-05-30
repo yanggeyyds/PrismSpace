@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SpaceScreen: top bar -->
+    <string name="lz_space_title">空间</string>
+    <string name="lz_space_selected_count">已选 %1$d 项</string>
+    <string name="lz_space_select_all">全选</string>
+    <string name="lz_space_deselect_all">取消全选</string>
+    <string name="lz_space_exit_multiselect">退出多选</string>
+
+    <!-- SpaceScreen: batch action bar -->
+    <string name="lz_space_batch_copy_to_dual">复制到双开</string>
+    <string name="lz_space_batch_freeze">冻结</string>
+    <string name="lz_space_batch_uninstall">卸载</string>
+    <string name="lz_space_batch_cancel">取消</string>
+
+    <!-- SpaceScreen: batch confirm dialogs -->
+    <string name="lz_space_batch_uninstall_title">卸载 %1$d 个应用？</string>
+    <string name="lz_space_batch_uninstall_body">将从双开空间卸载选中的 %1$d 个应用，应用数据会一并删除且不可恢复。系统会逐个弹出卸载确认。</string>
+    <string name="lz_space_batch_uninstall_confirm">卸载</string>
+    <string name="lz_space_batch_clone_title">克隆 %1$d 个应用到双开空间？</string>
+    <string name="lz_space_batch_clone_body">将按当前运行模式依次把选中的 %1$d 个应用克隆到双开空间。普通模式会逐个传输安装包，需在双开空间手动安装。</string>
+    <string name="lz_space_batch_clone_confirm">开始克隆</string>
+    <string name="lz_space_dialog_cancel">取消</string>
+
+    <!-- SpaceScreen: per-space delete -->
+    <string name="lz_space_delete_target_missing">空间不存在或已被移除</string>
+
+    <!-- SpaceScreen: search -->
+    <string name="lz_space_search_dual">在双开空间内搜索</string>
+    <string name="lz_space_search_main">在主空间内搜索</string>
+    <string name="lz_space_more_options">更多选项</string>
+
+    <!-- SpaceScreen: overflow menu -->
+    <string name="lz_space_menu_sort">排序方式</string>
+    <string name="lz_space_menu_sort_name">名称（A→Z）</string>
+    <string name="lz_space_menu_sort_time">安装时间（最近优先）</string>
+    <string name="lz_space_menu_sort_cloned">双开状态（已双开优先）</string>
+    <string name="lz_space_menu_filter">筛选</string>
+    <string name="lz_space_menu_filter_all">全部应用</string>
+    <string name="lz_space_menu_filter_cloned_only">仅已双开</string>
+    <string name="lz_space_menu_filter_not_cloned_only">仅未双开</string>
+    <string name="lz_space_menu_show_system">显示系统应用</string>
+    <string name="lz_space_menu_actions">操作</string>
+    <string name="lz_space_menu_refresh">刷新</string>
+
+    <!-- SpaceScreen: empty states -->
+    <string name="lz_space_empty_no_match">没有匹配的应用</string>
+    <string name="lz_space_empty_dual_locked">双开空间已锁定</string>
+    <string name="lz_space_empty_dual_suspended">双开空间已暂停</string>
+    <string name="lz_space_empty_dual_none">还没有双开应用</string>
+    <string name="lz_space_empty_none">没有可显示的应用</string>
+    <string name="lz_space_empty_no_match_hint">尝试其他搜索词</string>
+    <string name="lz_space_empty_dual_locked_hint">请先解锁双开空间（锁屏密码）后再查看分身</string>
+    <string name="lz_space_empty_dual_suspended_hint">在设置中恢复双开空间</string>
+    <string name="lz_space_empty_dual_none_hint">到「主空间」点按应用，克隆到双开空间</string>
+    <string name="lz_space_empty_none_hint">调整筛选或搜索条件</string>
+    <string name="lz_space_new_space">＋新建空间</string>
+    <string name="lz_space_exp_title">多 profile 是实验性功能</string>
+    <string name="lz_space_exp_dismiss">我知道了</string>
+    <string name="lz_space_exp_body">当前：%1$s（用户 %2$d） · 双开空间 %3$d/1\n\n本设备系统对每个主用户的工作/克隆资料配额为 1，写死于系统，Root 与企业策略均不能解除。多 profile 仅在解除该配额的定制 ROM 上可用，属实验性。\n\n你仍可在现有双开空间内继续双开更多不同的应用。</string>
+</resources>

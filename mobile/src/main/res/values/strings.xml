@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PrismSpace</string>
+    <string name="prism_profile_entry_label">Prism-Dual Space</string>
+    <string name="label_searchable">Apps in PrismSpace</string>
+
+
+    <string name="prism_home_status_ready_title">Clone space is ready</string>
+    <string name="prism_home_status_missing_title">Clone space is not ready</string>
+    <string name="prism_home_status_paused_title">Clone space is paused</string>
+    <string name="prism_home_status_ready_body">You can copy, launch, and manage apps in the clone space.</string>
+    <string name="prism_home_status_missing_body">Create or repair the work profile before copying apps.</string>
+    <string name="prism_home_status_paused_body">Resume clone space before launching apps inside it.</string>
+    <string name="prism_home_add_app">Add app</string>
+    <string name="prism_home_action_create_or_repair">Create or repair clone space</string>
+    <string name="prism_home_action_open_diagnostics">Open diagnostics</string>
+    <string name="prism_settings_open_shizuku">Open Shizuku</string>
+
+    <!-- Language picker (i18n) -->
+    <string name="prism_settings_language">Language</string>
+    <string name="prism_language_system">Follow system</string>
+    <string name="prism_language_zh">简体中文</string>
+    <string name="prism_language_en">English</string>
+
+
+
+
+    <!-- Compose setup wizard strings -->
+    <string name="prism_setup_hero_title">Welcome to PrismSpace</string>
+    <string name="prism_setup_hero_body">Run a second, independent copy of your apps safely on the same device.</string>
+    <string name="prism_setup_features_title">Main features</string>
+    <string name="prism_setup_feature_clone_title">App cloning</string>
+    <string name="prism_setup_feature_clone_body">Copy installed apps into a separate clone space with its own data.</string>
+    <string name="prism_setup_feature_isolation_title">Data isolation</string>
+    <string name="prism_setup_feature_isolation_body">Clone space uses its own accounts and storage, separated from your main apps.</string>
+    <string name="prism_setup_feature_files_title">Cross-space files</string>
+    <string name="prism_setup_feature_files_body">Move files between main space and clone space with explicit consent.</string>
+    <string name="prism_setup_privacy_title">How it works · Privacy</string>
+    <string name="prism_setup_privacy_body">PrismSpace creates the clone space via Android Work Profile. Core clone, install and file-transfer flows run locally; update checks, PrismProbe network tests and diagnostic sharing only run when you choose them.</string>
+    <string name="prism_setup_cta_primary">Create clone space</string>
+    <string name="prism_setup_cta_help">Having trouble?</string>
+    <string name="prism_setup_error_title">Setup error</string>
+    <string name="setup_root_profile_progress">Setting up PrismSpace...</string>
+    <string name="setup_error_managed_profile_not_supported">Sorry, the required feature \"Managed Profile\" is not supported on this device.</string>
+    <string name="setup_error_provisioning_incomplete">PrismSpace setup is incomplete, the previous attempt might be unsuccessful.\n\nIf your device ROM or 3rd-party tool enforce auto-start control (or similar background-restriction functionality), please whitelist PrismSpace in related settings, then continue the setup.</string>
+    <string name="setup_error_managed_device">Sorry, PrismSpace cannot be setup due to device currently being managed by <b>%1$s</b>.</string>
+    <string name="setup_error_missing_managed_provisioning">Sorry, the required \"Android for Work\" feature may not be fully supported on your device.</string>
+    <string name="setup_solution_for_cancelled_provision">Trouble setting up PrismSpace?\n\nIf setup was interrupted, return to the system setup screen and keep PrismSpace allowed to start in the background. On heavily customized ROMs, also disable battery or security restrictions for PrismSpace before retrying.\n\nRoot setup is available as an advanced fallback only when normal setup is blocked.</string>
+
+
+    <string name="button_setup_help">Setup help</string>
+    <string name="button_have_checked">I\'ve checked</string>
+    <string name="button_setup_space_with_root">Setup PrismSpace with root</string>
+    <string name="prism_help_setup_title">Setup help</string>
+    <string name="prism_help_setup_body">PrismSpace creates a managed clone space through Android work profile setup.\n\nIf setup fails, check these items first:\n· Keep PrismSpace allowed to run in the background.\n· Do not close the system provisioning screen while it is working.\n· Disable aggressive security or battery restrictions for PrismSpace, then retry.\n· Use root setup only as an advanced fallback when normal setup is blocked.</string>
+    <string name="prism_help_clone_title">Copy app help</string>
+    <string name="prism_help_clone_body">App copy needs either Android\'s install-existing path, an available system app store, Shizuku/ADB permission, or the PrismSpace installer module.\n\nIf this device blocks the current path, enable Shizuku/ADB mode in Settings or install the app in main space first, then copy it again.</string>
+    <string name="prism_help_main_space_title">Main-space management</string>
+    <string name="prism_help_main_space_body">Main-space management gives PrismSpace device-wide control, not just clone-space control. Use it only if you need features such as freezing main-space apps or applying ADB protection to the whole device.\n\nThis is optional. Clone-space app copy and launch do not require main-space management.</string>
+
+    <string name="action_rescind">Rescind</string>
+
+
+
+    <string name="dialog_title_warning">WARNING</string>
+    <string name="dialog_reactivate_message">PrismSpace was unexpectedly deactivated, please grant the Device Admin permission to re-activate.</string>
+    <string name="dialog_destroy_message">Are you sure you want to destroy the whole PrismSpace? You will LOSE ALL THE DATA in PrismSpace.\n\nDon\'t worry, apps and data outside PrismSpace will NEVER be affected.</string>
+    <string name="dialog_destroy_message_for_managed_user">If main space is also managed by PrismSpace, you cannot re-create PrismSpace space unless the control for main space is rescinded.\n\nAre you sure you still want to destroy the PrismSpace?</string>
+    <string name="dialog_rescind_message">Are you sure to rescind?\n\nYou will have to go through the setup flow again to bring it back, that means PrismSpace space and all accounts must be removed first if your device is not rooted.</string>
+    <string name="dialog_cannot_destroy_message">To remove the whole PrismSpace space, please open system \"Settings - Accounts\" and select \"Remove work profile\".</string>
+    <string name="dialog_critical_app_warning">This app (or component) is critical for the Android system or other apps to work properly. If proceed, some apps or the whole system may become unstable or malfunctional.\n\nDo you really want to proceed?</string>
+    <string name="dialog_space_setup_failed">Sorry, something went wrong in PrismSpace setup. (stage %1$d)</string>
+    <string name="dialog_root_setup_profile_exists">A PrismSpace clone space already exists on this device. To create it again, first remove the existing one from the main space, then try setup again.</string>
+
+    <string name="action_continue">Continue</string>
+    <string name="action_destroy">Destroy</string>
+
+    <string name="prompt_disable_sys_app_as_removal">System app can only be disabled. It\'s similar to the removal of an installed app.\n\nPrismSpace has no privilege to do that, instead you will be redirected to the system settings app, there you can click the \"DISABLE\" button to proceed.</string>
+    <string name="toast_enable_disabled_system_app">Please re-enable this clone.</string>
+
+    <string name="toast_successfully_cloned">%1$s is successfully cloned.</string>
+    <string name="toast_cannot_clone">Sorry, unable to clone %1$s.</string>
+    <string name="toast_clone_root_unavailable">Root access is required for automatic cloning. Enable Root in Settings, or use Shizuku / Play / file methods instead.</string>
+    <string name="toast_clone_file_sync_transferring">Transferring the installer to the dual space…</string>
+    <string name="dialog_title_clone_file_sync">Installer copied to dual space</string>
+    <string name="dialog_clone_file_sync_done">The full installer was copied to Download/PrismSpace in the dual space. Open the dual-space install entry and confirm with Android\'s system installer. To install a single APK from the system file manager, allow that file manager to install unknown apps first.</string>
+    <string name="toast_shortcut_failed">Failed to create the shortcut</string>
+    <string name="toast_error_freeze_failure">Failed to freeze</string>
+    <string name="toast_error_unfreeze_failure">Failed to unfreeze</string>
+    <string name="toast_error_freezing_active_admin">Cannot freeze active device-admin</string>
+    <string name="toast_app_launch_failure">Failed to launch %s</string>
+    <string name="prompt_activating_space">Activating PrismSpace…</string>
+    <string name="prompt_activate_space_first">Please activate PrismSpace first.</string>
+    <string name="prompt_invalid_shortcut">Invalid shortcut, please recreate.</string>
+
+    <!-- General words -->
+    <string name="open_settings">Open Settings</string>
+    <string name="prompt_space_not_ready">PrismSpace is not ready. Open Settings and check setup status or permission mode.</string>
+
+    <!-- Settings -->
+
+
+
+
+
+
+
+    <!-- Security Confirmation -->
+
+    <string name="toast_security_confirmation_failure">Failed to verify, please try again.</string>
+
+    <!-- New User Guide -->
+
+
+    <!-- Tip cards -->
+
+
+</resources>

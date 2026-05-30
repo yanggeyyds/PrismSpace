@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SettingsScreen.kt -->
+    <string name="lz_set_title">Settings</string>
+    <string name="lz_set_run_mode">Run mode</string>
+    <string name="lz_set_check_update_title">Check for updates</string>
+    <string name="lz_set_check_update_summary">Tap to check for a newer version</string>
+    <string name="lz_set_update_title">New version %1$s available</string>
+    <string name="lz_set_update_download">Download</string>
+    <string name="lz_set_update_later">Later</string>
+    <string name="lz_set_suspend_title">Freeze entire space</string>
+    <string name="lz_set_suspend_summary">Freezes all your clones at once and stops their background processes; toggle off to unfreeze — no data loss</string>
+    <string name="lz_set_repair_title">Repair dual space</string>
+    <string name="lz_set_repair_summary">Rebuilds the work profile connection; clones will close during the process</string>
+    <string name="lz_set_create_title">Create dual space</string>
+    <string name="lz_set_create_summary">Create a new Android work profile for cloned apps</string>
+    <string name="lz_set_delete_space_title">Delete dual space</string>
+    <string name="lz_set_delete_space_summary">Permanently removes the dual space and all clone data inside it</string>
+    <string name="lz_set_export_logs_title">Export diagnostic logs</string>
+    <string name="lz_set_export_logs_summary">Exports a detailed 2 MB rolling log and current system snapshot</string>
+    <string name="lz_set_about_title">About PrismSpace (棱镜空间)</string>
+    <string name="lz_set_about_summary">Project intro</string>
+    <string name="lz_set_cancel">Cancel</string>
+
+    <!-- ModeGuideSheet.kt -->
+    <string name="lz_set_mode_normal_title">Normal mode</string>
+    <string name="lz_set_mode_normal_summary">No extra authorization needed; core cloning, launch, freeze and file transfer all work</string>
+    <string name="lz_set_mode_shizuku_summary">Enhances cloning and cross-user operations; requires a Shizuku service connection</string>
+    <string name="lz_set_mode_root_summary">Advanced repair and diagnostics; requires Root permission</string>
+    <string name="lz_set_shizuku_intro">Shizuku lets PrismSpace use ADB privileges to enhance cloning and cross-user operations.</string>
+    <string name="lz_set_shizuku_step1">Step 1  Install and open the Shizuku app.</string>
+    <string name="lz_set_shizuku_step2">Step 2  Pair via Wireless debugging, or connect a computer and run ADB to start Shizuku; if you have Root you can start it from within Shizuku with one tap.</string>
+    <string name="lz_set_shizuku_step3">Step 3  Return to this page and tap the button below to check and authorize the connection.</string>
+    <string name="lz_set_shizuku_check_button">Check Shizuku connection</string>
+
+    <!-- AboutSheet.kt -->
+    <string name="lz_set_about_intro">A dual-space manager for Android. Built on top of the system work profile, it provides isolated runtime environments so the same app can run with multiple accounts in parallel, with data fully separated.</string>
+</resources>

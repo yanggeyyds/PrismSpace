@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic colors -->
+    <color name="textPrimary">@android:color/white</color>
+    <color name="background">#121212</color>
+<!-- background + 16% white -->
+    <!-- Specific colors -->
+<!-- Indigo A400 -->
+</resources>

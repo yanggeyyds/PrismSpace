@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PrismProfileEntryScreen (profile-side entry) -->
+    <string name="lz_pf_entry_hero_title_warn">PrismSpace not ready</string>
+    <string name="lz_pf_entry_hero_body_warn">This work profile has not granted PrismSpace management permission. Please reconfigure it in the main space.</string>
+    <string name="lz_pf_entry_hero_tag_warn">Error</string>
+    <string name="lz_pf_entry_export_title">Send files to the main space</string>
+    <string name="lz_pf_entry_export_summary">In an app, tap “Share” → switch to the “Personal” tab → choose “Import into this space PrismSpace”</string>
+    <string name="lz_pf_entry_footer">Management and settings should be done in the main space PrismSpace app.</string>
+    <string name="lz_pf_entry_topbar">Dual space</string>
+    <string name="lz_pf_entry_back_hint">Want to go back to the main space? Use the system Recents or the personal / work switcher on your home screen.</string>
+
+    <!-- FilesScreen -->
+    <string name="lz_pf_files_title">Files</string>
+    <string name="lz_pf_files_transfer_heading">Move files between spaces</string>
+    <string name="lz_pf_files_step1">In any app, select the file and tap the system “Share”.</string>
+    <string name="lz_pf_files_step2">On the share panel, switch the “Personal / Work” tab and choose the target space.</string>
+    <string name="lz_pf_files_step3">Choose “Import into this space PrismSpace”.</string>
+    <string name="lz_pf_files_step4">Choose the folder to save into. Done.</string>
+    <string name="lz_pf_files_tab_hint">The “Personal” tab = saves to the main space; the “Work” tab = saves to the dual space. Both directions use this same method.</string>
+    <string name="lz_pf_files_history_title">Transfer history</string>
+    <string name="lz_pf_files_clear">Clear</string>
+    <string name="lz_pf_files_clear_confirm_title">Clear transfer history?</string>
+    <string name="lz_pf_files_clear_confirm_body">This only clears the log below — your transferred files are not deleted.</string>
+    <string name="lz_pf_files_history_empty">No transfers yet. Once you share a file into this space using the method above, it will appear here.</string>
+    <string name="lz_pf_open_action">Open</string>
+    <string name="lz_pf_open_fail">Could not open it directly. Look under Download/PrismSpace in your system file manager.</string>
+    <!-- Foreground install in Normal mode -->
+    <string name="lz_pf_install">Install</string>
+    <string name="lz_pf_install_no_apk">Couldn\'t find the copied app package in this space. Re-clone it from the main space.</string>
+    <string name="lz_pf_install_started">Preparing to install…</string>
+    <string name="lz_pf_install_success">Installed into the dual space.</string>
+    <string name="lz_pf_install_failed">Install failed: %1$s</string>
+    <string name="lz_pf_install_need_perm">Allow PrismSpace to install unknown apps, then tap Install again.</string>
+    <string name="lz_pf_install_source_need_perm">Allow this file app to install unknown apps, then return to PrismSpace and open the APK again.</string>
+    <string name="lz_pf_install_use_prismspace">This system file app cannot be authorized for APK install. Tap Install here to continue with PrismSpace.</string>
+</resources>

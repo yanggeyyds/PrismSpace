@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SettingsViewModel: mapSettingsUiModel mode card -->
+    <string name="lz_setvm_mode_title">当前模式</string>
+    <string name="lz_setvm_mode_body_not_created">双开空间未创建，请先完成初始设置。</string>
+    <string name="lz_setvm_mode_body_shizuku">Shizuku 模式可用，增强能力已启用。</string>
+    <string name="lz_setvm_mode_body_normal">普通模式运行中，核心双开功能可用。</string>
+
+    <!-- SettingsViewModel: mode switching feedback -->
+    <string name="lz_setvm_switched_normal">已切换到普通模式</string>
+    <string name="lz_setvm_shizuku_connected">已连接 Shizuku · 已切换到 Shizuku 模式</string>
+    <string name="lz_setvm_shizuku_not_ready">Shizuku 未就绪，请先启动 Shizuku 服务并授权</string>
+    <string name="lz_setvm_root_requesting">正在向系统申请 Root 授权…</string>
+    <string name="lz_setvm_root_granted">已获得 Root 授权，已切换到 Root 模式</string>
+    <string name="lz_setvm_root_denied">未获得 Root 授权，模式未变更</string>
+
+    <!-- SettingsViewModel: space suspend / resume -->
+    <string name="lz_setvm_space_suspended">整个空间已冻结</string>
+    <string name="lz_setvm_space_resumed">整个空间已解冻</string>
+    <string name="lz_setvm_space_not_ready">双开空间尚未就绪，请到 设置 → 修复双开空间</string>
+    <string name="lz_setvm_no_apps_to_suspend">还没有分身可冻结——先到主空间克隆一个应用</string>
+    <string name="lz_setvm_no_apps_to_resume">双开空间内暂无可恢复的应用</string>
+    <string name="lz_setvm_partial_fail_suspend">%1$d 个分身未能冻结（通常是设备管理员应用或正在前台运行的应用）。关闭这些应用后重试。</string>
+    <string name="lz_setvm_partial_fail_resume">%1$d 个分身未能解冻，请稍后重试。</string>
+    <string name="lz_setvm_all_fail_freeze">没有分身能被冻结——通常是因为它们是设备管理员应用或正在前台运行。请先关闭这些应用（或在系统设置中撤销其设备管理员权限）后重试。</string>
+    <string name="lz_setvm_all_fail_unfreeze">没有分身能被解冻，请稍后重试。</string>
+    <string name="lz_setvm_update_checking">正在检查更新…</string>
+    <string name="lz_setvm_update_latest">已是最新版本（%1$s）</string>
+    <string name="lz_setvm_update_failed">检查更新失败，请检查网络后重试</string>
+    <string name="lz_setvm_suspend_failed">挂起失败：%1$s。可导出诊断日志查看详情</string>
+    <string name="lz_setvm_resume_failed">恢复失败：%1$s。可导出诊断日志查看详情</string>
+
+    <!-- SettingsViewModel: repair space -->
+    <string name="lz_setvm_opening_setup">正在打开双开空间创建流程…</string>
+    <string name="lz_setvm_repairing">正在修复双开空间…</string>
+    <string name="lz_setvm_repair_failed">修复失败: %1$s</string>
+    <string name="lz_setvm_profile_activation_failed">Android 未能恢复工作资料</string>
+    <string name="lz_setvm_space_already_ready">双开空间已正常，无需修复</string>
+
+    <!-- SettingsViewModel: diagnostic report export -->
+    <string name="lz_setvm_report_subject">PrismSpace 诊断报告</string>
+    <string name="lz_setvm_sharing_report">正在分享诊断报告…</string>
+    <string name="lz_setvm_report_attached">已附上诊断报告：%1$s</string>
+    <string name="lz_setvm_export_failed">导出失败: %1$s</string>
+
+    <!-- SettingsViewModel: diagnostic report body labels -->
+
+    <!-- SettingsViewModel: PrismProbe -->
+    <string name="lz_setvm_probe_not_installed">PrismProbe 未安装，无法打开。</string>
+    <string name="lz_setvm_probe_open_failed">PrismProbe 打开失败: %1$s</string>
+
+    <!-- SettingsViewModel: performance snapshot -->
+    <string name="lz_setvm_perf_snapshot">已用: %1$dMB / 上限: %2$dMB · 线程: %3$d · 核心: %4$d</string>
+
+    <!-- SettingsViewModel: Shizuku manager / permission -->
+    <string name="lz_setvm_shizuku_not_installed">Shizuku 未安装，无法打开。</string>
+    <string name="lz_setvm_shizuku_open_failed">Shizuku 打开失败。</string>
+    <string name="lz_setvm_shizuku_permission_requested">已请求 Shizuku 授权…</string>
+    <string name="lz_setvm_shizuku_permission_failed">Shizuku 授权请求失败: %1$s</string>
+</resources>

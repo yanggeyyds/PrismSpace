@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- PrismWatcher -->
+
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
+
+        <receiver android:name=".PrismWatcher" android:enabled="@bool/since_api_28" tools:targetApi="28"
+            android:directBootAware="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.USER_INFO_CHANGED" /> <!-- Registered only -->
+                <action android:name="android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED" />
+                <action android:name="android.app.action.APP_BLOCK_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".PrismWatcher$PrismDeactivationService" android:directBootAware="true"
+            android:foregroundServiceType="shortService" tools:targetApi="28" />
+
+        <receiver android:name=".PrismAppWatcher" android:enabled="@bool/since_api_26" android:directBootAware="true"
+            android:exported="false" tools:targetApi="26">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        <provider android:name=".PrismAppWatcher$AppStateTracker" android:authorities="${applicationId}.watcher"
+                  android:exported="false" android:enabled="@bool/since_api_26" android:directBootAware="true" tools:targetApi="26" />
+
+    </application>
+</manifest>

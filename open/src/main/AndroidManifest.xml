@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:dist="http://schemas.android.com/apk/distribution" xmlns:tools="http://schemas.android.com/tools">
+
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
+
+        <service android:name="com.yzddmr6.prismspace.SystemServiceBridge" android:exported="true" android:process=":api"> <!-- Run in separate process to isolate potential global injection -->
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.api.action.BIND_SYSTEM_SERVICE" />
+                <data android:scheme="service" />
+            </intent-filter>
+        </service>
+
+        <provider android:name="com.yzddmr6.prismspace.DelegatedScopeAuthorization$Initializer" android:authorities="${applicationId}.open.initializer" android:exported="false" />
+        <receiver android:name="com.yzddmr6.prismspace.DelegatedScopeAuthorization" android:permission="android.permission.BIND_DEVICE_ADMIN" android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.action.REQUEST_PERMISSION" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

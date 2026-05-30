@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">稜鏡空間</string>
+    <string name="prism_profile_entry_label">稜鏡-雙開空間</string>
+    <string name="label_searchable">雙開空間中的應用程式</string>
+
+
+
+
+
+    <!-- Compose setup wizard strings -->
+    <string name="prism_setup_hero_title">歡迎使用 PrismSpace</string>
+    <string name="prism_setup_hero_body">在同一部裝置上安全執行另一份獨立的應用副本。</string>
+    <string name="prism_setup_features_title">主要功能</string>
+    <string name="prism_setup_feature_clone_title">應用克隆</string>
+    <string name="prism_setup_feature_clone_body">將已安裝的應用複製到獨立的雙開空間，資料互不干擾。</string>
+    <string name="prism_setup_feature_isolation_title">資料隔離</string>
+    <string name="prism_setup_feature_isolation_body">雙開空間使用獨立的帳號與儲存空間，與主空間應用互相隔離。</string>
+    <string name="prism_setup_feature_files_title">跨空間檔案</string>
+    <string name="prism_setup_feature_files_body">在主空間與雙開空間之間，依需求安全傳輸檔案。</string>
+    <string name="prism_setup_privacy_title">運作方式 · 隱私</string>
+    <string name="prism_setup_privacy_body">PrismSpace 透過 Android 工作資料建立雙開空間。應用雙開、安裝和檔案傳輸等核心流程在裝置本機完成；檢查更新、PrismProbe 網路測試和診斷分享只會在你主動使用時發起。</string>
+    <string name="prism_setup_cta_primary">開始建立雙開空間</string>
+    <string name="prism_setup_cta_help">遇到問題？</string>
+    <string name="prism_setup_error_title">無法繼續</string>
+    <string name="dialog_root_setup_profile_exists">裝置上已存在 PrismSpace 雙開空間。如需重新建立，請先在主空間中刪除已有的雙開空間，然後再次嘗試設定。</string>
+    <string name="setup_root_profile_progress">正在建立雙開空間…</string>
+    <string name="setup_error_managed_profile_not_supported">抱歉，此裝置不支援必需的「Android 工作資料」特性。</string>
+    <string name="setup_error_provisioning_incomplete">雙開空間的建立不完整，在此之前的建立嘗試可能並未成功。\n\n<b>如果您的裝置或其它三方工具施加了「自啟動」（或類似的）限制，請務必首先將應用雙開解除限制或加入白名單，然後再次建立雙開空間。</b></string>
+    <string name="setup_error_managed_device">抱歉，由於此裝置已被 <b>%1$s</b> 接管，雙開空間無法建立。</string>
+    <string name="setup_error_missing_managed_provisioning">抱歉，由於此裝置並未完整支援必需的「Android 工作資料」特性。</string>
+    <string name="setup_solution_for_cancelled_provision">建立雙開空間遇到了困難？\n\n如果建立過程被中斷，請重新進入系統建立流程，並確保棱鏡空間允許背景啟動。部分深度客製系統還需要先關閉電池最佳化或安全限制，然後再重試。\n\nRoot 建立只作為進階兜底路徑，普通使用者路徑不依賴 Root。</string>
+
+
+    <string name="button_setup_help">建立說明</string>
+    <string name="button_have_checked">我已檢查</string>
+    <string name="button_setup_space_with_root">透過 ROOT 建立雙開空間</string>
+    <string name="prism_help_setup_title">建立說明</string>
+    <string name="prism_help_setup_body">棱鏡空間透過 Android 工作資料建立獨立的雙開空間。\n\n如果建立失敗，先檢查這些項目：\n· 允許棱鏡空間背景執行和自啟動。\n· 系統建立頁面工作時不要手動關閉。\n· 關閉安全中心或電池策略對棱鏡空間的限制後重試。\n· Root 建立僅作為普通建立被系統攔截後的進階兜底。</string>
+    <string name="prism_help_clone_title">複製應用程式說明</string>
+    <string name="prism_help_clone_body">複製應用程式需要 Android 的已安裝應用複製能力、可用的系統應用商店、Shizuku/ADB 授權，或棱鏡空間安裝器模組。\n\n如果目前路徑被系統攔截，請先在主空間安裝目標應用程式後再次複製，或在設定裡啟用 Shizuku/ADB 模式。</string>
+    <string name="prism_help_main_space_title">管理主空間</string>
+    <string name="prism_help_main_space_body">管理主空間會讓棱鏡空間獲得整機範圍的管理能力，不只是雙開空間能力。只有當你需要凍結主空間應用程式，或把 ADB 安全限制套用到整台裝置時才需要啟用。\n\n這是可選能力。複製和啟動雙開應用程式不需要管理主空間。</string>
+    <string name="prism_home_status_ready_title">雙開空間正常</string>
+    <string name="prism_home_status_missing_title">雙開空間尚未就緒</string>
+    <string name="prism_home_status_paused_title">雙開空間已暫停</string>
+    <string name="prism_home_status_ready_body">可以複製、開啟和管理雙開空間裡的應用程式。</string>
+    <string name="prism_home_status_missing_body">需要建立或修復工作資料後才能複製應用程式。</string>
+    <string name="prism_home_status_paused_body">恢復雙開空間後才能開啟其中的應用程式。</string>
+    <string name="prism_home_add_app">新增應用程式</string>
+    <string name="prism_home_action_create_or_repair">建立或修復雙開空間</string>
+    <string name="prism_home_action_open_diagnostics">開啟診斷</string>
+
+    <string name="action_rescind">撤銷</string>
+
+
+
+    <string name="dialog_title_warning">注意</string>
+    <string name="dialog_reactivate_message">雙開空間入口被意外關閉，請再次授權裝置管理權限以重新開啟。</string>
+    <string name="dialog_destroy_message">確定要刪除整個雙開空間？其中的應用程式副本和所有資料將被永久刪除，無法復原。\n\n主空間的應用程式和資料不會受到影響。</string>
+    <string name="dialog_destroy_message_for_managed_user">如果「主空間」也由應用雙開管理，由於 Android 系統施加的限制，您將無法再建立新的雙開空間，除非撤銷對「主空間」的管理權。\n\n確定仍要刪除此雙開空間？</string>
+    <string name="dialog_rescind_message">確定要撤銷對「主空間」的管理權？\n\n將來若希望重新啟用，必須再一次完成必要的流程。如果沒有 ROOT 權限，屆時需要刪除現有的雙開空間（如果已建立）並退出裝置上登入的所有帳號。</string>
+    <string name="dialog_cannot_destroy_message">如果要刪除整個雙開空間，請打開系統設定 -（帳戶和）帳號，點選「移除工作資料」。</string>
+    <string name="dialog_critical_app_warning">這個應用程式（或服務）可能對於 Android 系統或其它應用程式的正常運作至關重要。如果繼續此操作，部分應用程式甚至整個系統可能因此變得不穩定或無法正常運作。\n\n確認繼續？</string>
+    <string name="dialog_space_setup_failed">抱歉，建立雙開空間時出現了異常。（階段 %1$d）</string>
+
+    <string name="action_continue">繼續</string>
+    <string name="action_destroy">刪除</string>
+
+    <string name="prompt_disable_sys_app_as_removal">系統應用程式（或服務）只能被停用，與解除安裝應用程式的效果相似。\n\n由於沒有權限直接停用應用程式，接下來即將打開系統的應用程式設定介面，屆時請點擊「停用」按鈕。</string>
+    <string name="toast_enable_disabled_system_app">請重新啟用此分身</string>
+
+    <string name="toast_successfully_cloned">%1$s 已完成分身</string>
+    <string name="toast_cannot_clone">抱歉，無法為 %1$s 分身。</string>
+    <string name="toast_shortcut_failed">快速啟動方式建立失敗</string>
+    <string name="toast_error_freeze_failure">凍結失敗</string>
+    <string name="toast_error_unfreeze_failure">解凍失敗</string>
+    <string name="toast_error_freezing_active_admin">無法凍結已啟用裝置管理器的應用程式</string>
+    <string name="toast_app_launch_failure">未能啟動 %s</string>
+    <string name="prompt_activating_space">正在啟用雙開空間…</string>
+    <string name="prompt_activate_space_first">請先啟用雙開空間…</string>
+    <string name="prompt_invalid_shortcut">快速啟動方式已失效，請重新建立</string>
+
+    <!-- General words -->
+    <string name="open_settings">打開系統設定</string>
+
+    <!-- Settings -->
+
+
+
+
+
+
+
+    <!-- Security Confirmation -->
+
+    <string name="toast_security_confirmation_failure">安全確認失敗，請重試。</string>
+
+    <!-- New User Guide -->
+
+
+    <!-- Tip cards -->
+
+</resources>

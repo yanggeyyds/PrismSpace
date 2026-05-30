@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SpaceScreen: top bar -->
+    <string name="lz_space_title">Spaces</string>
+    <string name="lz_space_selected_count">%1$d selected</string>
+    <string name="lz_space_select_all">Select all</string>
+    <string name="lz_space_deselect_all">Deselect all</string>
+    <string name="lz_space_exit_multiselect">Exit selection</string>
+
+    <!-- SpaceScreen: batch action bar -->
+    <string name="lz_space_batch_copy_to_dual">Copy to dual</string>
+    <string name="lz_space_batch_freeze">Freeze</string>
+    <string name="lz_space_batch_uninstall">Uninstall</string>
+    <string name="lz_space_batch_cancel">Cancel</string>
+
+    <!-- SpaceScreen: batch confirm dialogs -->
+    <string name="lz_space_batch_uninstall_title">Uninstall %1$d apps?</string>
+    <string name="lz_space_batch_uninstall_body">The selected %1$d apps will be uninstalled from the dual space, and their data will be permanently deleted and cannot be recovered. The system will prompt for confirmation for each one.</string>
+    <string name="lz_space_batch_uninstall_confirm">Uninstall</string>
+    <string name="lz_space_batch_clone_title">Clone %1$d apps to the dual space?</string>
+    <string name="lz_space_batch_clone_body">The selected %1$d apps will be cloned to the dual space one by one according to the current run mode. In standard mode the installation packages are transferred one by one and must be installed manually in the dual space.</string>
+    <string name="lz_space_batch_clone_confirm">Start cloning</string>
+    <string name="lz_space_dialog_cancel">Cancel</string>
+
+    <!-- SpaceScreen: per-space delete -->
+    <string name="lz_space_delete_target_missing">The space does not exist or has been removed</string>
+
+    <!-- SpaceScreen: search -->
+    <string name="lz_space_search_dual">Search within the dual space</string>
+    <string name="lz_space_search_main">Search within the main space</string>
+    <string name="lz_space_more_options">More options</string>
+
+    <!-- SpaceScreen: overflow menu -->
+    <string name="lz_space_menu_sort">Sort by</string>
+    <string name="lz_space_menu_sort_name">Name (A→Z)</string>
+    <string name="lz_space_menu_sort_time">Install time (most recent first)</string>
+    <string name="lz_space_menu_sort_cloned">Clone status (cloned first)</string>
+    <string name="lz_space_menu_filter">Filter</string>
+    <string name="lz_space_menu_filter_all">All apps</string>
+    <string name="lz_space_menu_filter_cloned_only">Cloned only</string>
+    <string name="lz_space_menu_filter_not_cloned_only">Not cloned only</string>
+    <string name="lz_space_menu_show_system">Show system apps</string>
+    <string name="lz_space_menu_actions">Actions</string>
+    <string name="lz_space_menu_refresh">Refresh</string>
+
+    <!-- SpaceScreen: empty states -->
+    <string name="lz_space_empty_no_match">No matching apps</string>
+    <string name="lz_space_empty_dual_locked">Dual space is locked</string>
+    <string name="lz_space_empty_dual_suspended">Dual space is paused</string>
+    <string name="lz_space_empty_dual_none">No cloned apps yet</string>
+    <string name="lz_space_empty_none">No apps to display</string>
+    <string name="lz_space_empty_no_match_hint">Try a different search term</string>
+    <string name="lz_space_empty_dual_locked_hint">Unlock the dual space (lock-screen password) first, then view the clones</string>
+    <string name="lz_space_empty_dual_suspended_hint">Resume the dual space in Settings</string>
+    <string name="lz_space_empty_dual_none_hint">Go to “Main space”, tap an app, and clone it to the dual space</string>
+    <string name="lz_space_empty_none_hint">Adjust the filter or search criteria</string>
+    <string name="lz_space_new_space">＋ New space</string>
+    <string name="lz_space_exp_title">Multi-profile is experimental</string>
+    <string name="lz_space_exp_dismiss">Got it</string>
+    <string name="lz_space_exp_body">Current: %1$s (user %2$d) · dual spaces %3$d/1\n\nThis device caps work/clone profiles at 1 per primary user — hardwired in the system; neither Root nor enterprise policy can lift it. Multi-profile only works on custom ROMs that remove that cap, so it is experimental.\n\nYou can still run more different apps inside your existing dual space.</string>
+</resources>

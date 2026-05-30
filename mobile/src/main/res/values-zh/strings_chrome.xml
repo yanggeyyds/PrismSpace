@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lz_mode_normal">普通模式</string>
+    <string name="lz_mode_shizuku">Shizuku/ADB</string>
+    <string name="lz_mode_root">Root</string>
+    <string name="lz_nav_home">首页</string>
+    <string name="lz_nav_space">空间</string>
+    <string name="lz_nav_files">文件</string>
+    <string name="lz_nav_settings">设置</string>
+    <string name="lz_space_main_name">主空间</string>
+</resources>

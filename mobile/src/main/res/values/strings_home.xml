@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- HomeScreen: top bar + content descriptions -->
+    <string name="lz_home_title">Home</string>
+    <string name="lz_home_about">About</string>
+
+    <!-- HomeScreen: status hero card -->
+    <string name="lz_home_loading">Loading…</string>
+    <string name="lz_home_repair_fallback">Repair dual space</string>
+
+    <!-- HomeScreen: stat cards -->
+    <string name="lz_home_main_space">Main space</string>
+    <string name="lz_home_dual_space">Dual space</string>
+    <string name="lz_home_main_count">%1$d apps</string>
+    <string name="lz_home_clone_count">%1$d clones</string>
+
+    <!-- HomeScreen: info rows -->
+    <string name="lz_home_work_profile">Work profile</string>
+    <string name="lz_home_run_mode">Run mode</string>
+    <string name="lz_home_android_version">Android version</string>
+    <string name="lz_home_device">Device</string>
+
+    <!-- HomeViewModel: status titles / bodies / tags / primary labels -->
+    <string name="lz_home_status_normal_title">Dual space is healthy</string>
+    <string name="lz_home_status_normal_body">Your clones are ready to launch.</string>
+    <string name="lz_home_tag_normal">Healthy</string>
+    <string name="lz_home_label_add_app">Clone an app</string>
+
+    <string name="lz_home_status_notcreated_title">Dual space not created</string>
+    <string name="lz_home_status_notcreated_body">Go to Settings to create a dual space.</string>
+    <string name="lz_home_tag_notcreated">Not created</string>
+    <string name="lz_home_label_create">Create dual space</string>
+
+    <string name="lz_home_status_suspended_title">Dual space suspended</string>
+    <string name="lz_home_status_suspended_body">Dual space is suspended; clone apps are temporarily unavailable.</string>
+    <string name="lz_home_tag_suspended">Suspended</string>
+    <string name="lz_home_label_restore">Restore dual space</string>
+
+    <string name="lz_home_status_locked_title">Dual space locked</string>
+    <string name="lz_home_status_locked_body">Unlock the dual space first (enter the lock-screen password) before using clones.</string>
+    <string name="lz_home_tag_locked">Locked</string>
+    <string name="lz_home_label_unlock">Unlock</string>
+
+    <string name="lz_home_status_needsrepair_title">Dual space needs repair</string>
+    <string name="lz_home_status_needsrepair_body">A problem was found in the last check; go to Settings to repair it.</string>
+    <string name="lz_home_tag_needsrepair">Needs repair</string>
+    <string name="lz_home_label_repair">Repair dual space</string>
+
+    <!-- HomeViewModel: profile owner status labels -->
+    <string name="lz_home_profile_not_created">Not created</string>
+    <string name="lz_home_profile_suspended">Suspended</string>
+    <string name="lz_home_profile_ready">Dual space ready</string>
+</resources>

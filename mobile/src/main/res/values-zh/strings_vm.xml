@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SpaceViewModel: status chip text -->
+    <string name="lz_vm_chip_frozen">已冻结</string>
+    <string name="lz_vm_chip_running">运行中</string>
+    <string name="lz_vm_chip_cloned">已双开</string>
+    <string name="lz_vm_chip_not_cloned">未双开</string>
+
+    <!-- SpaceViewModel: batch progress -->
+    <string name="lz_vm_batch_progress">正在处理 %1$d/%2$d…</string>
+
+    <!-- SpaceViewModel: provisioning in-progress feedback -->
+    <string name="lz_vm_creating_space">正在创建双开空间…</string>
+    <string name="lz_vm_deleting_space">正在删除双开空间…</string>
+    <string name="lz_vm_default_space_name">双开空间</string>
+
+    <!-- ActionFeedback: files import -->
+    <string name="lz_vm_files_imported">已导入 %1$d 个文件</string>
+    <string name="lz_vm_files_import_all_failed">导入失败：%1$d 个文件未能导入</string>
+    <string name="lz_vm_files_import_partial">导入完成：成功 %1$d，失败 %2$d</string>
+    <string name="lz_vm_files_import_detailed">导入完成：成功 %1$d，超限跳过 %2$d，失败 %3$d</string>
+
+    <!-- ActionFeedback: batch actions -->
+    <string name="lz_vm_batch_freeze_ok">已冻结 %1$d 个应用</string>
+    <string name="lz_vm_batch_freeze_partial">冻结完成: 成功 %1$d, 失败 %2$d</string>
+    <string name="lz_vm_batch_uninstall_ok">正在卸载 %1$d 个应用</string>
+    <string name="lz_vm_batch_uninstall_partial">卸载发起: 成功 %1$d, 失败 %2$d</string>
+    <string name="lz_vm_batch_clone_ok">正在克隆 %1$d 个应用到双开空间</string>
+    <string name="lz_vm_batch_clone_partial">克隆发起: 成功 %1$d, 失败 %2$d</string>
+
+    <!-- ProvisioningFeedback: create -->
+    <string name="lz_vm_create_success">已创建新的双开空间</string>
+    <string name="lz_vm_create_root_unavailable">需要 Root 权限才能创建空间，请先在设置中启用 Root</string>
+    <string name="lz_vm_create_cap_reached">已达本设备空间上限（最多 %1$d 个用户），无法再创建</string>
+    <string name="lz_vm_create_managed_profile_limit">本设备系统仅允许一个双开空间（已达系统工作资料上限），无法再创建</string>
+    <string name="lz_vm_create_failed">创建空间失败：%1$s，可重试</string>
+
+    <!-- ProvisioningFeedback: delete -->
+    <string name="lz_vm_delete_success">已删除该双开空间</string>
+    <string name="lz_vm_delete_root_unavailable">普通模式无法直接删除双开空间，请在系统设置中移除工作资料；启用 Root 后可一键删除。</string>
+    <string name="lz_vm_delete_failed">删除空间失败：%1$s，空间未被破坏，可重试</string>
+
+    <!-- Shared fallback for unknown reasons -->
+    <string name="lz_vm_unknown_error">未知错误</string>
+
+    <!-- DestroyProfileFeedback -->
+    <string name="lz_vm_destroy_in_progress">正在删除双开空间…</string>
+    <string name="lz_vm_destroy_not_profile_owner">无管理权限，需在系统设置中手动移除双开空间</string>
+    <string name="lz_vm_destroy_failed">删除失败：%1$s，空间未被破坏，可重试</string>
+
+    <!-- LaunchFeedback -->
+    <string name="lz_vm_launch_space_not_ready">双开空间尚未就绪，请在设置中检查空间状态或权限模式</string>
+    <string name="lz_vm_launch_app_missing">%1$s 在该空间没有可启动入口</string>
+    <string name="lz_vm_launch_denied">无权限访问该空间，请检查权限模式</string>
+    <string name="lz_vm_launch_unknown">未能启动 %1$s：%2$s</string>
+
+    <!-- PrismSettingsModeState: mode cards -->
+    <string name="lz_vm_mode_normal_title">普通模式</string>
+    <string name="lz_vm_mode_normal_status">可用</string>
+    <string name="lz_vm_mode_normal_summary">双开空间、应用打开、冻结、暂停和基础文件导入导出不需要 Root。</string>
+    <string name="lz_vm_mode_shizuku_title">Shizuku 模式</string>
+    <string name="lz_vm_mode_shizuku_summary_ready">可用于增强复制、后台限制和更多系统查询。</string>
+    <string name="lz_vm_mode_shizuku_summary_waiting">Shizuku 已连接，仍需要授权 PrismSpace。</string>
+    <string name="lz_vm_mode_shizuku_summary_not_running">启动 Shizuku 或无线调试后可启用增强能力。</string>
+    <string name="lz_vm_mode_shizuku_summary_not_installed">未检测到 Shizuku；普通双开功能仍可使用。</string>
+    <string name="lz_vm_mode_root_title">Root 模式</string>
+    <string name="lz_vm_mode_root_summary">Root 仅用于高级诊断和兜底维护，不是普通双开功能的依赖。</string>
+
+    <!-- PrismShizukuAdbStatus labels -->
+    <string name="lz_vm_shizuku_status_not_installed">未安装</string>
+    <string name="lz_vm_shizuku_status_not_running">未运行</string>
+    <string name="lz_vm_shizuku_status_waiting">等待授权</string>
+    <string name="lz_vm_shizuku_status_ready">可用</string>
+
+    <!-- PrismRootStatus labels -->
+    <string name="lz_vm_root_status_not_detected">未检测</string>
+    <string name="lz_vm_root_status_available_disabled">可用但关闭</string>
+    <string name="lz_vm_root_status_enabled">已启用</string>
+</resources>

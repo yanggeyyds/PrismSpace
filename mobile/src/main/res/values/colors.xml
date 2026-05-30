@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic colors -->
+    <color name="textPrimary">@color/primary_dark</color>
+    <color name="background">#F3F3F3</color>
+    <!-- Specific colors -->
+
+    <!-- PrismSpace product surface -->
+    <color name="prism_surface">#FFFFFF</color>
+</resources>

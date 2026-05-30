@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SettingsViewModel: mapSettingsUiModel mode card -->
+    <string name="lz_setvm_mode_title">Current mode</string>
+    <string name="lz_setvm_mode_body_not_created">Dual space not created. Please finish initial setup first.</string>
+    <string name="lz_setvm_mode_body_shizuku">Shizuku mode active. Enhanced capabilities enabled.</string>
+    <string name="lz_setvm_mode_body_normal">Normal mode. Core dual-app features available.</string>
+
+    <!-- SettingsViewModel: mode switching feedback -->
+    <string name="lz_setvm_switched_normal">Switched to Normal mode</string>
+    <string name="lz_setvm_shizuku_connected">Shizuku connected · switched to Shizuku mode</string>
+    <string name="lz_setvm_shizuku_not_ready">Shizuku is not ready. Please start the Shizuku service and grant authorization first.</string>
+    <string name="lz_setvm_root_requesting">Requesting Root authorization from the system…</string>
+    <string name="lz_setvm_root_granted">Root authorization granted · switched to Root mode</string>
+    <string name="lz_setvm_root_denied">Root authorization not granted. Mode unchanged.</string>
+
+    <!-- SettingsViewModel: space suspend / resume -->
+    <string name="lz_setvm_space_suspended">Entire space frozen</string>
+    <string name="lz_setvm_space_resumed">Entire space unfrozen</string>
+    <string name="lz_setvm_space_not_ready">Dual space is not ready yet. Go to Settings → Repair dual space.</string>
+    <string name="lz_setvm_no_apps_to_suspend">No clones to freeze yet — clone an app from the main space first</string>
+    <string name="lz_setvm_no_apps_to_resume">No apps available to resume in the dual space</string>
+    <string name="lz_setvm_partial_fail_suspend">%1$d clone(s) could not be frozen (usually device-admin apps or apps running in the foreground). Close them and try again.</string>
+    <string name="lz_setvm_partial_fail_resume">%1$d clone(s) could not be unfrozen. Please try again shortly.</string>
+    <string name="lz_setvm_all_fail_freeze">No clones could be frozen — usually because they are device-admin apps or running in the foreground. Close those apps (or revoke their device-admin in system settings) and try again.</string>
+    <string name="lz_setvm_all_fail_unfreeze">No clones could be unfrozen. Please try again shortly.</string>
+    <string name="lz_setvm_update_checking">Checking for updates…</string>
+    <string name="lz_setvm_update_latest">You\'re on the latest version (%1$s)</string>
+    <string name="lz_setvm_update_failed">Update check failed. Check your connection and retry.</string>
+    <string name="lz_setvm_suspend_failed">Suspend failed: %1$s. Export the diagnostic log for details.</string>
+    <string name="lz_setvm_resume_failed">Resume failed: %1$s. Export the diagnostic log for details.</string>
+
+    <!-- SettingsViewModel: repair space -->
+    <string name="lz_setvm_opening_setup">Opening dual-space setup…</string>
+    <string name="lz_setvm_repairing">Repairing dual space…</string>
+    <string name="lz_setvm_repair_failed">Repair failed: %1$s</string>
+    <string name="lz_setvm_profile_activation_failed">Android did not resume the work profile</string>
+    <string name="lz_setvm_space_already_ready">Dual space is already ready</string>
+
+    <!-- SettingsViewModel: diagnostic report export -->
+    <string name="lz_setvm_report_subject">PrismSpace diagnostic report</string>
+    <string name="lz_setvm_sharing_report">Sharing diagnostic report…</string>
+    <string name="lz_setvm_report_attached">Diagnostic report attached: %1$s</string>
+    <string name="lz_setvm_export_failed">Export failed: %1$s</string>
+
+    <!-- SettingsViewModel: diagnostic report body labels -->
+
+    <!-- SettingsViewModel: PrismProbe -->
+    <string name="lz_setvm_probe_not_installed">PrismProbe is not installed and cannot be opened.</string>
+    <string name="lz_setvm_probe_open_failed">Failed to open PrismProbe: %1$s</string>
+
+    <!-- SettingsViewModel: performance snapshot -->
+    <string name="lz_setvm_perf_snapshot">Used: %1$dMB / Max: %2$dMB · Threads: %3$d · Cores: %4$d</string>
+
+    <!-- SettingsViewModel: Shizuku manager / permission -->
+    <string name="lz_setvm_shizuku_not_installed">Shizuku is not installed and cannot be opened.</string>
+    <string name="lz_setvm_shizuku_open_failed">Failed to open Shizuku.</string>
+    <string name="lz_setvm_shizuku_permission_requested">Shizuku authorization requested…</string>
+    <string name="lz_setvm_shizuku_permission_failed">Shizuku authorization request failed: %1$s</string>
+</resources>

@@ -1,0 +1,3 @@
+include 'shared', 'engine', 'mobile', 'installer', 'watcher', 'open'
+include ':probe'
+include 'assembly'

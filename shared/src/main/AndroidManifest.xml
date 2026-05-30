@@ -1,0 +1,43 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" android:maxSdkVersion="25" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES" />
+    <uses-permission android:name="android.permission.GET_APP_OPS_STATS" tools:ignore="ProtectedPermissions" /> <!-- AppOpsCompat -->
+    <uses-permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+
+    <application android:name="com.yzddmr6.prismspace.PrismApplication" tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
+
+        <provider android:name="com.yzddmr6.prismspace.util.Users"
+                  android:initOrder="1000"
+                  android:authorities="${applicationId}.users"
+                  android:directBootAware="true"
+                  android:exported="false" />
+
+        <provider android:name="androidx.core.content.FileProvider"
+                  android:authorities="${applicationId}.diagnostics"
+                  android:exported="false"
+                  android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                       android:resource="@xml/prism_diagnostic_paths" />
+        </provider>
+
+        <activity android:name="com.yzddmr6.prismspace.shuttle.ShuttleCarrierActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:directBootAware="true"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.SHUTTLE" />
+                <category android:name="com.yzddmr6.prismspace.category.PARENT_PROFILE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <provider android:authorities="${applicationId}.shuttle" android:exported="false"
+                  android:name="com.yzddmr6.prismspace.shuttle.ShuttleProvider" android:grantUriPermissions="true"
+                  android:directBootAware="true" />
+
+    </application>
+
+</manifest>

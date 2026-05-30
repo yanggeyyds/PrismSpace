@@ -1,0 +1,108 @@
+package com.yzddmr6.prismspace.api;
+
+import static android.content.Context.APP_OPS_SERVICE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.P;
+import static com.yzddmr6.prismspace.ApiConstants.DELEGATION_APP_OPS;
+
+import android.annotation.SuppressLint;
+import android.app.AppOpsManager;
+import android.app.DerivedAppOpsManager;
+import android.content.Context;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import com.yzddmr6.prismspace.util.UserHandles;
+import com.yzddmr6.prismspace.util.Hack;
+import com.yzddmr6.prismspace.util.annotation.UserIdInt;
+import com.yzddmr6.prismspace.RestrictedBinderProxy;
+import com.yzddmr6.prismspace.appops.AppOpsHelper;
+import com.yzddmr6.prismspace.shuttle.Shuttle;
+import com.yzddmr6.prismspace.util.Hacks;
+import com.yzddmr6.prismspace.util.Users;
+
+import kotlin.Unit;
+
+/**
+ * Delegated {@link AppOpsManager}
+ *
+ * Created by Oasis on 2019-4-30.
+ */
+public class DelegatedAppOpsManager extends DerivedAppOpsManager {
+
+	public static Binder buildBinderProxy(final Context context) throws ReflectiveOperationException {
+		return new DelegatedAppOpsManager(context).mBinderProxy;
+	}
+
+	@SuppressLint("MissingPermission") private DelegatedAppOpsManager(final Context context) throws ReflectiveOperationException {
+		mBinderProxy = sHelper.inject(this, context, APP_OPS_SERVICE, (c, delegate) -> new AppOpsBinderProxy(c, DELEGATION_APP_OPS, delegate));
+		final Hacks.AppOpsManager aom = Hack.into(this).with(Hacks.AppOpsManager.class);
+
+		// Supported APIs. (not the following but the indirectly invoked APIs on IAppOpsService)
+		aom.setMode(0, 0, "a.b.c", 0);  // Must be the first one. See AppOpsBinderProxy.onTransact() below.
+		aom.setUidMode(AppOpsManager.OPSTR_CAMERA, 0, 0);
+		aom.getOpsForPackage(0, "a.b.c", new int[]{ 0 });
+		aom.getPackagesForOps(new int[]{ 0 });
+		aom.setRestriction(0, 0, 0, null);
+
+		mBinderProxy.seal();
+	}
+
+	private final AppOpsBinderProxy mBinderProxy;
+
+	private static final DerivedManagerHelper<AppOpsManager> sHelper = new DerivedManagerHelper<>(AppOpsManager.class);
+
+	private static class AppOpsBinderProxy extends RestrictedBinderProxy {
+
+		@Override protected boolean onTransact(final int code, @NonNull final Parcel data, @Nullable final Parcel reply, final int flags) throws RemoteException {
+			if (SDK_INT >= P && ! isSealed() && mCodeSetMode == - 1) mCodeSetMode = code;
+			return super.onTransact(code, data, reply, flags);
+		}
+
+		@Override protected boolean doTransact(final int code, final Parcel data, final Parcel reply, final int flags) throws RemoteException {
+			if (code == mCodeSetMode && SDK_INT >= P) return setMode(data);
+			else return super.doTransact(code, data, reply, flags);
+		}
+
+		@RequiresApi(P) protected boolean setMode(final Parcel data) {
+			if (SDK_INT < P) throw new SecurityException("PrismSpace has no privilege to setMode() before Android P.");
+
+			data.enforceInterface(DESCRIPTOR);
+			final int op = data.readInt();
+			final int uid = data.readInt();
+			final String pkg = data.readString();
+			if (pkg == null) throw new NullPointerException("packageName is null");
+			final int mode = data.readInt();
+			Log.i(TAG, "IAppOpsService.setMode(" + op + ", " + uid + ", " + pkg + ", " + mode + ")");
+
+			final @UserIdInt int user_id = UserHandles.getUserId(uid);
+			if (user_id == Users.currentId()) {
+				new AppOpsHelper(mContext).setMode(pkg, op, mode, uid);
+				return true;
+			}
+			final UserHandle user = UserHandles.of(user_id);
+			if (! Users.isProfileManagedByPrism(mContext, user))
+				throw new IllegalArgumentException("User " + user_id + " is not managed by PrismSpace");
+
+			new Shuttle(mContext, user).launch(context -> {
+				new AppOpsHelper(context).setMode(pkg, op, mode, uid); return Unit.INSTANCE;
+			});
+			return true;
+		}
+
+		AppOpsBinderProxy(final Context context, final String delegation, final IBinder delegate) { super(context, delegation, delegate); }
+
+		private int mCodeSetMode = -1;
+		private static final java.lang.String DESCRIPTOR = "com.android.internal.app.IAppOpsService";
+	}
+
+	@SuppressWarnings("SpellCheckingInspection") private static final String TAG = "Prism.DAOM";
+}

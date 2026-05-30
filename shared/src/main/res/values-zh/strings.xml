@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_ongoing_task">执行中的任务</string>
+    <string name="notification_channel_important">重要事项</string>
+    <string name="notification_channel_app_install">应用安装</string>
+    <string name="notification_channel_space_watcher">双开空间监控</string>
+    <string name="notification_channel_app_watcher">应用监控</string>
+    <string name="notification_channel_debug">诊断</string>
+
+    <string name="device_admin_support_message_short">如需取消此限制，请在“棱镜空间”中调整相应的设置。\n\n应用权限：限制修改状态表明此权限已被撤销。如需恢复，请至“设置 - 各空间的独立设置 - 隐私保护”。</string>
+    <string name="device_admin_support_message_long">您可能注意到系统界面中出现的“设备由您所在的单位负责管理”或类似信息，这是 Android 工作资料（双开空间的 Android 底层机制）激活后的透明性告知，无法隐去。\n\n棱镜空间不会自动上传个人数据。空间管理、安装和文件传输等核心流程在设备本地完成；检查更新、PrismProbe 网络测试和诊断分享只会在你主动使用时发起。\n\n如果遇到“XX 特性已被管理员禁用”，可能是由于您打开了某项限制功能，请至此应用中调整相应的设置。</string>
+
+    <string name="prompt_failed_preserving_app_ops">权限设置未能保留（内部异常）</string>
+
+    <string name="notification_profile_shuttle_pending_title">跨空间功能受限</string>
+    <string name="notification_profile_shuttle_pending_text">点此恢复</string>
+
+    <string name="mainland_name">主空间</string>
+    <string name="default_space_name">双开空间</string>
+    <string name="default_space0_name">双开空间 1</string>
+    <string name="default_space1_name">双开空间 2</string>
+    <string name="default_space2_name">双开空间 3</string>
+    <string name="default_space3_name">双开空间 4</string>
+    <string name="default_spaceN_name">双开空间 %d</string>
+</resources>

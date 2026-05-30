@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_group_control_space_apps_label">應用雙開管理的應用程式</string>
+    <string name="permission_group_control_space_apps_description">控制應用雙開管理的應用程式</string>
+    <string name="permission_freeze_app_label">凍結應用雙開管理的應用程式</string>
+    <string name="permission_freeze_app_description">這個應用程式被授權可隨時凍結及解凍應用雙開管理的任意應用程式</string>
+    <string name="permission_launch_app_label">啟動應用雙開管理的應用程式</string>
+    <string name="permission_launch_app_description">這個應用程式被授權可啟動應用雙開管理的任何應用程式，凍結的應用程式將在啟動前解凍。</string>
+    <string name="permission_suspend_app_label">暫停應用雙開管理的應用程式</string>
+    <string name="permission_suspend_app_description">這個應用程式被授權可隨時暫停及復原應用雙開管理的任意應用程式</string>
+
+    <string name="notification_provisioning_space_title">正在準備雙開空間…</string>
+    <string name="notification_provisioning_mainland_title">正在管理主空間…</string>
+    <string name="notification_provisioning_text">可能需要數分鐘之久</string>
+
+    <string name="toast_setup_complete">雙開空間已建立完成。</string>
+    <string name="toast_reprovision_done">修復已完成</string>
+    <string name="toast_reprovision_failed">修復未能完成，雙開空間未被更動。</string>
+</resources>

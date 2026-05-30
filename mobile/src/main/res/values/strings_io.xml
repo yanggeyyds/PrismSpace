@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lz_io_no_file">No file received to import</string>
+    <string name="lz_io_cant_read">Cannot read the selected file</string>
+    <string name="lz_io_cancelled">Import cancelled</string>
+    <string name="lz_io_done">Saved: %1$s</string>
+    <string name="lz_io_failed">Import failed: %1$s</string>
+</resources>

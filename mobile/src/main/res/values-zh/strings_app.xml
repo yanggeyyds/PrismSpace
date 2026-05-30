@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppActionSheet -->
+    <string name="lz_app_launch">启动应用</string>
+    <string name="lz_app_launch_frozen_subtitle">已冻结，将先解冻再启动</string>
+    <string name="lz_app_freeze">冻结</string>
+    <string name="lz_app_unfreeze">解冻</string>
+    <string name="lz_app_app_info">应用信息</string>
+    <string name="lz_app_uninstall_clone">卸载分身</string>
+    <string name="lz_app_go_to_dual_space">跳双开空间</string>
+    <string name="lz_app_clone_to_dual_space">克隆到双开空间</string>
+
+    <!-- AppClonesBottomSheet -->
+    <string name="lz_app_choose_install_method">选择安装方式</string>
+    <string name="lz_app_copy_to">复制到</string>
+    <string name="lz_app_enable_guide">去启用</string>
+    <string name="lz_app_target_already_in_space">%1$s · 已在此空间</string>
+
+    <!-- 克隆安装方式标签 -->
+    <string name="lz_app_method_filesync_title">文件同步安装</string>
+    <string name="lz_app_method_filesync_summary">把完整应用和 split 一起复制到双开空间，用户随后在双开空间用系统安装器完成安装。</string>
+    <string name="lz_app_method_shizuku_title">Shizuku 自动安装</string>
+    <string name="lz_app_method_shizuku_summary_ready">经 Shizuku 静默安装到双开空间</string>
+    <string name="lz_app_method_shizuku_summary_not_connected">Shizuku 未连接</string>
+    <string name="lz_app_method_shizuku_summary_waiting">Shizuku 等待授权</string>
+    <string name="lz_app_method_shizuku_summary_wrong_mode">切换到 Shizuku 模式后可用</string>
+    <string name="lz_app_method_root_title">Root 自动安装</string>
+    <string name="lz_app_method_root_summary_ready">经 Root 静默安装到双开空间</string>
+    <string name="lz_app_method_root_summary_not_enabled">未启用 Root 模式（去设置启用后可自动安装）</string>
+    <string name="lz_app_filesync_open_install_entry">打开双开空间安装入口</string>
+    <string name="lz_app_filesync_allow_file_manager">授权系统文件管理器</string>
+    <string name="lz_app_clone_shizuku_failed">Shizuku 克隆失败。请打开 Shizuku 确认已授权 PrismSpace 后重试。</string>
+
+    <!-- DeleteSpaceSheets -->
+    <string name="lz_app_delete_dual_space">删除双开空间</string>
+    <string name="lz_app_delete_dual_space_warning">将删除这个双开空间及其所有分身应用，应用数据会被永久清除，此操作不可恢复。</string>
+    <string name="lz_app_continue_delete">继续删除</string>
+    <string name="lz_app_cancel">取消</string>
+    <string name="lz_app_final_confirmation">最后确认</string>
+    <string name="lz_app_delete_final_warning">确认后双开空间立即删除，所有分身数据无法找回。</string>
+    <string name="lz_app_permanently_delete">确认永久删除</string>
+    <string name="lz_app_repair_dual_space_title">修复双开空间？</string>
+    <string name="lz_app_repair_dual_space_body">这个操作会重新建立工作资料的 Profile Owner 绑定，仅在双开空间状态异常时使用。\n\n注意：\n• 修复期间所有正在运行的分身应用会被关闭。\n• 系统可能将你短暂带离 PrismSpace，请稍后回到本应用查看结果。\n• 大多数情况下不需要使用此功能。</string>
+    <string name="lz_app_start_repair">开始修复</string>
+</resources>

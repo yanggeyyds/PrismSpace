@@ -1,0 +1,34 @@
+PrismSpace
+Copyright (C) 2024-2026 PrismSpace contributors
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version. See the LICENSE file for the full GPL-3.0 text.
+
+--------------------------------------------------------------------------
+Third-party / upstream attribution
+--------------------------------------------------------------------------
+
+PrismSpace is derived from and incorporates source code of:
+
+    Island
+    Copyright (C) Oasis Feng and the Island contributors
+    https://github.com/oasisfeng/island
+    Licensed under the Apache License, Version 2.0.
+
+The original Apache License 2.0, under which the incorporated Island code
+was obtained, is retained verbatim in the file LICENSE-APACHE, and this
+attribution is preserved in accordance with Section 4 of that license.
+
+The Apache License 2.0 is one-way compatible with the GNU GPL v3: Apache-2.0
+licensed code may be incorporated into a larger work distributed under the
+GPL-3.0. Accordingly, the PrismSpace combined/derivative work as a whole is
+distributed under the GPL-3.0 (see LICENSE). The Apache-2.0 terms continue
+to apply to the original Island portions; the GPL-3.0 applies to the
+combined work and to PrismSpace's own contributions.
+
+This product also bundles, at build time, third-party libraries under their
+respective licenses (e.g. AndroidX / Jetpack Compose under Apache-2.0,
+Shizuku API under its own license). Such dependencies are not relicensed by
+this NOTICE and remain under their original terms.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General -->
+    <string translatable="false" name="key_launch_shortcut_prefix">launch_shortcut_prefix</string>
+    <!-- PrismSpace (per-profile) -->
+    <!-- Privacy -->
+    <!-- About -->
+</resources>

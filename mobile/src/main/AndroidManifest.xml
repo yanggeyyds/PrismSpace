@@ -1,0 +1,222 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" >
+
+    <uses-feature android:name="android.software.device_admin" android:required="true" />
+    <uses-feature android:name="android.software.managed_users" android:required="true" />
+
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />   <!-- AppLaunchShortcut -->
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" /> <!-- AppLaunchShortcut -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Network diagnostics and compatibility helpers -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" tools:ignore="ProtectedPermissions" /> <!-- PrismFiles -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- UninstallHelper.UninstallReceiver -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" /> <!-- Required to start ACTION_UNINSTALL_PACKAGE since Android P -->
+
+    <queries>
+        <package android:name="com.yzddmr6.prismprobe" />
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
+        </intent>
+    </queries>
+
+    <application android:label="@string/app_name"
+                 android:icon="@mipmap/ic_launcher"
+                 android:roundIcon="@mipmap/ic_launcher_round"
+                 android:supportsRtl="true"
+                 android:theme="@style/AppTheme.NoActionBar"
+                 tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+
+        <meta-data android:name="android.max_aspect" android:value="2.1" />
+        <!-- windowSoftInputMode="adjustPan" to avoid bottom-sheet hanging in the center of screen when search is finished and IME panel is closed. -->
+        <activity android:name="com.yzddmr6.prismspace.MainActivity" android:windowSoftInputMode="adjustPan"
+            android:exported="true" android:directBootAware="true">
+            <intent-filter android:priority="-1"> <!-- Used by PrismProvisioning to launch this activity from PrismSpace after successful provisioning -->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.yzddmr6.prismspace.category.PARENT_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
+        </activity>
+
+        <activity android:name="com.yzddmr6.prismspace.LauncherActivity"
+            android:exported="true"
+            android:directBootAware="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- PARENT_PROFILE marker: setupLauncherActivityInPrism() disables this activity in managed profiles -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.yzddmr6.prismspace.category.PARENT_PROFILE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.yzddmr6.prismspace.prism.ui.ProfileImagePickerActivity"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.PROFILE_IMAGE_PICKER" />
+                <category android:name="com.yzddmr6.prismspace.category.MANAGED_PROFILE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.yzddmr6.prismspace.prism.ui.ProfileDownloadsActivity"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.PROFILE_DOWNLOADS" />
+                <category android:name="com.yzddmr6.prismspace.category.MANAGED_PROFILE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Parent-side receiver for 双→主 export: the dual space forwards a picked file here via
+             CATEGORY_PARENT_PROFILE (FLAG_MANAGED_CAN_ACCESS_PARENT). Runs in the main user, writes
+             the received file into the main MediaStore. Normal permissions only. -->
+        <activity
+            android:name="com.yzddmr6.prismspace.prism.ui.ImportToSpaceActivity"
+            android:label="导入到此空间 PrismSpace"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <!-- Unified bidirectional file transfer via the system SHARE chooser. PrismSpace is in both
+                 spaces, so this target shows under the Personal/Work tabs: Personal imports to the
+                 main space, Work imports to the dual space. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.yzddmr6.prismspace.shortcut.PrismAppShortcut$ShortcutLauncher"
+            android:hardwareAccelerated="false"
+            android:resumeWhilePausing="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:clearTaskOnLaunch="true"
+            android:taskAffinity=":shortcut"
+            android:exported="true"
+            android:launchMode="singleTask" > <!-- Keeps shortcut launches in a single trampoline task. -->
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.LAUNCH_APP" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+                <data android:scheme="android-app" />
+                <data android:scheme="app" />
+            </intent-filter>
+        </activity>
+
+        <service android:name="com.yzddmr6.prismspace.shortcut.PrismAppShortcut$ShortcutSyncService"
+                 android:exported="false" android:enabled="@bool/since_api_26" tools:targetApi="26">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.PersistentService" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.yzddmr6.prismspace.shortcut.ShortcutsUpdater" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MANAGED_PROFILE_REMOVED" /> <!-- Registered receiver only, delegate by DeviceAdminReceiver -->
+            </intent-filter>
+        </receiver>
+
+        <activity android:name="com.yzddmr6.prismspace.setup.SetupActivity" android:theme="@style/SetupTheme" />
+
+        <activity android:name="com.yzddmr6.prismspace.action.FeatureActionActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="prismspace" android:host="feature" />
+            </intent-filter>
+        </activity>
+
+        <provider android:authorities="${applicationId}.apps"
+                  android:name="com.yzddmr6.prismspace.data.PrismAppListProvider"
+                  android:exported="false"
+                  android:multiprocess="true" />
+
+        <receiver android:name="com.yzddmr6.prismspace.adb.ProfileRestrictionsSync" android:directBootAware="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.yzddmr6.prismspace.settings.PrismSettingsActivity$Enabler" android:exported="false"> <!-- Enable PrismSettingsActivity then disable self -->
+            <intent-filter>
+                <action android:name="android.intent.action.USER_INITIALIZE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.yzddmr6.prismspace.PrismNameManager$NameInitializer"
+                  android:exported="false" android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_INITIALIZE" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name="com.yzddmr6.prismspace.settings.PrismSettingsActivity"
+                  android:directBootAware="true"
+                  android:label="@string/prism_profile_entry_label"
+                  android:icon="@mipmap/ic_launcher"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  android:exported="true"
+                  android:enabled="false"> <!-- Enabled by PrismSettingsActivity$Enabler; directBootAware so it can receive Shuttle URI grants in user-locked state. Visible in profile launcher as "切回主空间" / "Switch to main space" — Android DPM requires ProfileOwner to expose at least one LAUNCHER activity. Body is a trampoline that bounces back to parent profile MainActivity. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.yzddmr6.prismspace.category.MANAGED_PROFILE" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="com.yzddmr6.prismspace.settings.AppOpsPermissionsUnlock" android:directBootAware="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker" />
+
+        <provider android:name="com.yzddmr6.prismspace.shizuku.NonRootShizukuProvider"
+                  android:authorities="${applicationId}.shizuku"
+                  android:multiprocess="false"
+                  android:exported="true"
+                  android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" /> <!-- "INTERACT_ACROSS_USERS_FULL" to protect this provider from being accessed by normal apps -->
+
+    </application>
+
+</manifest>

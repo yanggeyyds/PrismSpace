@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_group_control_space_apps_label">Control PrismSpace apps</string>
+    <string name="permission_group_control_space_apps_description">control apps managed by PrismSpace</string>
+    <string name="permission_freeze_app_label">Freeze PrismSpace-managed apps</string>
+    <string name="permission_freeze_app_description">This app can freeze and unfreeze any app managed by PrismSpace at any time.</string>
+    <string name="permission_launch_app_label">Launch PrismSpace-managed apps</string>
+    <string name="permission_launch_app_description">This app can launch any app managed by PrismSpace, which will be unfrozen if needed.</string>
+    <string name="permission_suspend_app_label">Suspend PrismSpace-managed apps</string>
+    <string name="permission_suspend_app_description">This app can suspend and unsuspend any app managed by PrismSpace at any time.</string>
+
+    <string name="notification_provisioning_space_title">Provisioning PrismSpace…</string>
+    <string name="notification_provisioning_mainland_title">Provisioning main space…</string>
+    <string name="notification_provisioning_text">It may take several minutes.</string>
+
+    <string name="toast_setup_complete">PrismSpace setup is complete.</string>
+    <string name="toast_reprovision_done">Done repairing.</string>
+    <string name="toast_reprovision_failed">Repair could not be completed. Your dual space was not changed.</string>
+</resources>

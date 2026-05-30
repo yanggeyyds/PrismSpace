@@ -1,0 +1,144 @@
+package com.yzddmr6.prismspace.data;
+
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.QUERY_ALL_PACKAGES;
+import static android.content.Context.LAUNCHER_APPS_SERVICE;
+import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_LAUNCHER;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.Q;
+import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toSet;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherApps;
+import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
+import android.util.ArrayMap;
+
+import androidx.annotation.Nullable;
+
+import com.yzddmr6.prismspace.common.app.AppInfo;
+import com.yzddmr6.prismspace.engine.ClonedHiddenSystemApps;
+import com.yzddmr6.prismspace.util.Hacks;
+import com.yzddmr6.prismspace.util.Suppliers;
+import com.yzddmr6.prismspace.util.Users;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+
+/**
+ * PrismSpace-specific {@link AppInfo}
+ *
+ * Created by Oasis on 2016/8/10.
+ */
+public class PrismAppInfo extends AppInfo {
+
+	void setHidden(final boolean state) {
+		final Integer private_flags = Hacks.ApplicationInfo_privateFlags.get(this);
+		if (private_flags != null)
+			Hacks.ApplicationInfo_privateFlags.set(this, state ? private_flags | PRIVATE_FLAG_HIDDEN : private_flags & ~ PRIVATE_FLAG_HIDDEN);
+	}
+
+	/** Some system apps are hidden by post-provisioning, they should be treated as "disabled". */
+	public boolean shouldShowAsEnabled() {
+		return enabled && ! isHiddenSysPrismAppTreatedAsDisabled();
+	}
+
+	public boolean isHiddenSysPrismAppTreatedAsDisabled() {
+		return isSystem() && isHidden() && shouldTreatHiddenSysAppAsDisabled();
+	}
+
+	private boolean shouldTreatHiddenSysAppAsDisabled() {
+		return ! ClonedHiddenSystemApps.isCloned(this);
+	}
+
+	/** @return whether this package is critical to the system, thus should not be frozen or disabled. */
+	public boolean isCritical() {
+		return ((PrismAppListProvider) mProvider).isCritical(packageName);
+	}
+
+	public boolean canQueryAllPackages() { return mCanQueryAllPackages.get(); }
+	private boolean checkCanQueryAllPackages() {
+		return SDK_INT <= Q || targetSdkVersion <= Q
+				|| context().checkPermission(QUERY_ALL_PACKAGES, -1, uid) == PERMISSION_GRANTED;
+	}
+	private final Supplier<Boolean> mCanQueryAllPackages = Suppliers.memoize(this::checkCanQueryAllPackages);
+
+	public boolean canManageExternalStorage() { return mCanManageExternalStorage.get(); }
+	private boolean checkCanManageExternalStorage() {
+		return SDK_INT > Q && targetSdkVersion > Q
+				&& context().checkPermission(MANAGE_EXTERNAL_STORAGE, -1, uid) == PERMISSION_GRANTED;
+	}
+	private final Supplier<Boolean> mCanManageExternalStorage = Suppliers.memoize(this::checkCanManageExternalStorage);
+
+	/** Is launchable (even if hidden) */
+	@Override public boolean isLaunchable() { return mIsLaunchable.get(); }
+	private final Supplier<Boolean> mIsLaunchable = Suppliers.memoizeWithExpiration(	// Use GET_DISABLED_COMPONENTS in case mainland sibling is disabled.
+			() -> checkLaunchable(Hacks.RESOLVE_ANY_USER_AND_UNINSTALLED | MATCH_DISABLED_COMPONENTS), 1, SECONDS);
+
+	@Override protected boolean checkLaunchable(final int flags_for_resolve) {
+		if (! Users.isParentProfile(user) && ! isHidden()) {		// Accurate detection for non-frozen app in PrismSpace
+			if (sLaunchableNonFrozenPrismAppsCache != null) {
+				final Set<String> launchable = sLaunchableNonFrozenPrismAppsCache.get(user);
+				if (launchable != null) return launchable.contains(packageName);
+			}
+			try { return ! requireNonNull((LauncherApps) context().getSystemService(LAUNCHER_APPS_SERVICE)).getActivityList(packageName, user).isEmpty(); }
+			catch (final SecurityException e) { return false; } // "SecurityException: Cannot retrieve activities for unrelated profile NNN" appeared on OPPO A3s and Vivo 1718 (both Android 8.1).
+		}
+		if (sPotentiallyLaunchableAppsCache != null) return sPotentiallyLaunchableAppsCache.contains(packageName);
+		return super.checkLaunchable(flags_for_resolve);	// Inaccurate detection for frozen app (false-positive if launcher activity is actually disabled)
+	}
+
+	public static void cacheLaunchableApps(final Context context) {
+		if (Users.hasProfile()) {
+			sLaunchableNonFrozenPrismAppsCache = new ArrayMap<>();
+			final LauncherApps la = requireNonNull(context.getSystemService(LauncherApps.class));
+			for (final UserHandle profile : Users.getProfilesManagedByPrism()) {
+				final Set<String> apps = la.getActivityList(null, profile).stream().map(lai ->
+						lai.getComponentName().getPackageName()).collect(toSet());
+				sLaunchableNonFrozenPrismAppsCache.put(profile, apps);
+			}
+		}
+		@SuppressLint("WrongConstant") final List<ResolveInfo> activities = context.getPackageManager().queryIntentActivities(
+				new Intent(ACTION_MAIN).addCategory(CATEGORY_LAUNCHER), Hacks.RESOLVE_ANY_USER_AND_UNINSTALLED | MATCH_DISABLED_COMPONENTS);
+		sPotentiallyLaunchableAppsCache = activities.stream().map(resolve -> resolve.activityInfo.packageName).collect(toSet());
+	}
+
+	public static void invalidateLaunchableAppsCache() { sLaunchableNonFrozenPrismAppsCache = null; sPotentiallyLaunchableAppsCache = null; }
+
+	private static Map<UserHandle, Set<String>> sLaunchableNonFrozenPrismAppsCache;
+	private static Set<String> sPotentiallyLaunchableAppsCache;
+
+	@Override public PrismAppInfo getLastInfo() { return (PrismAppInfo) super.getLastInfo(); }
+
+	public PrismAppInfo cloneWithLabel(final CharSequence label) {
+		return new PrismAppInfo((PrismAppListProvider) mProvider, user, this, getLastInfo(), label);
+	}
+
+	PrismAppInfo(final PrismAppListProvider provider, final UserHandle user, final ApplicationInfo base, final @Nullable PrismAppInfo last) {
+		this(provider, user, base, last, null);
+	}
+
+	PrismAppInfo(final PrismAppListProvider provider, final UserHandle user, final ApplicationInfo base,
+	                      final @Nullable PrismAppInfo last, final @Nullable CharSequence label) {
+		super(provider, base, last, label);
+		this.user = user;
+	}
+
+	@Override public StringBuilder buildToString(final Class<?> clazz) {
+		final StringBuilder builder = super.buildToString(clazz).append(", user ").append(Users.toId(user));
+		if (isHidden()) builder.append(! Users.isParentProfile(user) && shouldTreatHiddenSysAppAsDisabled() ? ", hidden (as disabled)" : ", hidden");
+		return builder;
+	}
+
+	public final UserHandle user;
+}

@@ -1,0 +1,26 @@
+# Local directories
+/release
+/captures
+/proguard
+/design
+/dist
+/.agents
+/.codex
+
+# Local configuration file (sdk path, etc)
+/local.properties
+/keystore.jks
+
+# Android Studio
+.idea
+*.iml
+.gradle
+local.gradle
+build
+
+# OSX files
+.DS_Store
+
+# Crash/heap dumps & runtime logs
+*.hprof
+/logs

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppActionSheet -->
+    <string name="lz_app_launch">Launch app</string>
+    <string name="lz_app_launch_frozen_subtitle">Frozen — will be unfrozen before launch</string>
+    <string name="lz_app_freeze">Freeze</string>
+    <string name="lz_app_unfreeze">Unfreeze</string>
+    <string name="lz_app_app_info">App info</string>
+    <string name="lz_app_uninstall_clone">Uninstall clone</string>
+    <string name="lz_app_go_to_dual_space">Go to dual space</string>
+    <string name="lz_app_clone_to_dual_space">Clone to dual space</string>
+
+    <!-- AppClonesBottomSheet -->
+    <string name="lz_app_choose_install_method">Choose install method</string>
+    <string name="lz_app_copy_to">Copy to</string>
+    <string name="lz_app_enable_guide">Enable</string>
+    <string name="lz_app_target_already_in_space">%1$s · Already in this space</string>
+
+    <!-- Clone install method labels (were hardcoded Chinese in PrismAppClones.request — i18n fix) -->
+    <string name="lz_app_method_filesync_title">File-sync install</string>
+    <string name="lz_app_method_filesync_summary">Copies the full app, including splits, into the dual space. The user finishes installation with the system installer there.</string>
+    <string name="lz_app_method_shizuku_title">Shizuku auto-install</string>
+    <string name="lz_app_method_shizuku_summary_ready">Silently install into the dual space via Shizuku</string>
+    <string name="lz_app_method_shizuku_summary_not_connected">Shizuku not connected</string>
+    <string name="lz_app_method_shizuku_summary_waiting">Shizuku awaiting authorization</string>
+    <string name="lz_app_method_shizuku_summary_wrong_mode">Switch to Shizuku mode to use this</string>
+    <string name="lz_app_method_root_title">Root auto-install</string>
+    <string name="lz_app_method_root_summary_ready">Silently install into the dual space via Root</string>
+    <string name="lz_app_method_root_summary_not_enabled">Root mode off — enable it in Settings to auto-install</string>
+    <string name="lz_app_filesync_open_install_entry">Open dual-space installer</string>
+    <string name="lz_app_filesync_allow_file_manager">Allow file manager</string>
+    <string name="lz_app_clone_shizuku_failed">Clone via Shizuku failed. Open Shizuku and make sure PrismSpace is authorized, then try again.</string>
+
+    <!-- DeleteSpaceSheets -->
+    <string name="lz_app_delete_dual_space">Delete dual space</string>
+    <string name="lz_app_delete_dual_space_warning">This will delete this dual space and all of its cloned apps. App data will be permanently erased and this action cannot be undone.</string>
+    <string name="lz_app_continue_delete">Continue</string>
+    <string name="lz_app_cancel">Cancel</string>
+    <string name="lz_app_final_confirmation">Final confirmation</string>
+    <string name="lz_app_delete_final_warning">Once confirmed, the dual space is deleted immediately and all cloned data is unrecoverable.</string>
+    <string name="lz_app_permanently_delete">Permanently delete</string>
+    <string name="lz_app_repair_dual_space_title">Repair dual space?</string>
+    <string name="lz_app_repair_dual_space_body">This action re-establishes the Profile Owner binding of the work profile and should only be used when the dual space is in an abnormal state.\n\nNote:\n• All running cloned apps will be closed during the repair.\n• The system may briefly take you out of PrismSpace; please return to this app afterwards to check the result.\n• In most cases this feature is not needed.</string>
+    <string name="lz_app_start_repair">Start repair</string>
+</resources>

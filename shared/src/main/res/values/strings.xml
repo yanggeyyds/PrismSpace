@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_ongoing_task">Ongoing task</string>
+    <string name="notification_channel_important">Important</string>
+    <string name="notification_channel_app_install">App Installation</string>
+    <string name="notification_channel_space_watcher">PrismSpace Watcher</string>
+    <string name="notification_channel_app_watcher">App Watcher</string>
+    <string name="notification_channel_debug">Diagnostics</string>
+
+    <string name="device_admin_support_message_short">To disable this restriction, please refer to corresponding setting in PrismSpace.</string>
+    <string name="device_admin_support_message_long">When PrismSpace is activated, you may see \"device is managed by your organization\" or similar information around the system UI. It\'s the standard transparency notice of Android for Work (the underlying Android feature used by PrismSpace), which cannot be removed.\n\nPrismSpace does not upload personal data automatically. Core space-management, install and file-transfer flows run locally; update checks, PrismProbe network tests and diagnostic sharing only run when you choose them.\n\nIf you get message \"xxx feature disabled by admin\", you may have enabled one of the restriction features in PrismSpace, please refer to corresponding setting in PrismSpace.\n\nTo uninstall PrismSpace, you must deactivate it first, go to PrismSpace - Settings - Scoped Settings - Destroy / Deactivate.</string>
+
+    <string name="prompt_failed_preserving_app_ops">App Ops was not preserved due to internal error.</string>
+
+    <string name="notification_profile_shuttle_pending_title">Cross-land functionality is limited</string>
+    <string name="notification_profile_shuttle_pending_text">Tap to restore</string>
+
+    <string name="mainland_name">main space</string>
+    <string name="default_space_name">PrismSpace</string>
+    <string name="default_space0_name">Clone space 1</string>
+    <string name="default_space1_name">Clone space 2</string>
+    <string name="default_space2_name">Clone space 3</string>
+    <string name="default_space3_name">Clone space 4</string>
+    <string name="default_spaceN_name">PrismSpace %d</string>
+</resources>

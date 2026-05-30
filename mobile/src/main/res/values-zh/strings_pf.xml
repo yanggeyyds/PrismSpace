@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PrismProfileEntryScreen (profile-side entry) -->
+    <string name="lz_pf_entry_hero_title_warn">PrismSpace 未就绪</string>
+    <string name="lz_pf_entry_hero_body_warn">本工作资料未授予 PrismSpace 管理权限，请在主空间重新配置。</string>
+    <string name="lz_pf_entry_hero_tag_warn">异常</string>
+    <string name="lz_pf_entry_export_title">把文件传到主空间</string>
+    <string name="lz_pf_entry_export_summary">在应用里点「分享」→ 切「个人」标签 → 选「导入到此空间 PrismSpace」</string>
+    <string name="lz_pf_entry_footer">管理与设置请在主空间 PrismSpace 应用中进行。</string>
+    <string name="lz_pf_entry_topbar">双开空间</string>
+    <string name="lz_pf_entry_back_hint">想回到主空间？用系统的「最近任务」或桌面的个人 / 工作切换器切回即可。</string>
+
+    <!-- FilesScreen -->
+    <string name="lz_pf_files_title">文件</string>
+    <string name="lz_pf_files_transfer_heading">在空间之间传文件</string>
+    <string name="lz_pf_files_step1">在任意应用里选中文件，点系统的「分享」。</string>
+    <string name="lz_pf_files_step2">在分享面板切换「个人 / 工作」标签，选择目标空间。</string>
+    <string name="lz_pf_files_step3">选择「导入到此空间 PrismSpace」。</string>
+    <string name="lz_pf_files_step4">选择要保存到的文件夹，完成。</string>
+    <string name="lz_pf_files_tab_hint">「个人」标签 = 存到主空间；「工作」标签 = 存到双开空间。两个方向都用这一种方式。</string>
+    <string name="lz_pf_files_history_title">传输记录</string>
+    <string name="lz_pf_files_clear">清空</string>
+    <string name="lz_pf_files_clear_confirm_title">清空传输记录？</string>
+    <string name="lz_pf_files_clear_confirm_body">仅清空下方的记录列表，已传输的文件不会被删除。</string>
+    <string name="lz_pf_files_history_empty">暂无传输记录。用上面的方式分享文件到此空间后会出现在这里。</string>
+    <string name="lz_pf_open_action">打开</string>
+    <string name="lz_pf_open_fail">无法直接打开，请在系统文件管理器的 下载/PrismSpace 里查看。</string>
+    <!-- 普通模式前台安装 -->
+    <string name="lz_pf_install">安装</string>
+    <string name="lz_pf_install_no_apk">在本空间找不到已复制的应用安装包，请到主空间重新克隆。</string>
+    <string name="lz_pf_install_started">正在准备安装…</string>
+    <string name="lz_pf_install_success">已安装到双开空间。</string>
+    <string name="lz_pf_install_failed">安装失败：%1$s</string>
+    <string name="lz_pf_install_need_perm">请先允许 PrismSpace 安装未知应用，然后再点「安装」。</string>
+    <string name="lz_pf_install_source_need_perm">请允许这个文件应用安装未知应用，然后回到 PrismSpace 再打开 APK。</string>
+    <string name="lz_pf_install_use_prismspace">系统文件应用无法授权安装 APK，请在这里点「安装」继续。</string>
+</resources>

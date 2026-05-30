@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="com.yzddmr6.prismspace.permission.FREEZE_PACKAGE" />
+    <uses-permission android:name="com.yzddmr6.prismspace.permission.LAUNCH_PACKAGE" />
+    <application>
+        <activity android:name="com.yzddmr6.prismspace.api.ApiActivityTest$DummyActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <provider android:authorities="${applicationId}.AIP" android:name="com.yzddmr6.prismspace.provisioning.AutoIncrementalProvision" android:enabled="false"/>
+    </application>
+</manifest>

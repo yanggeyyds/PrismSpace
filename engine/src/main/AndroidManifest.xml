@@ -1,0 +1,145 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="internalOnly">
+
+    <uses-feature android:name="android.software.device_admin" android:required="true" />
+    <uses-feature android:name="android.software.managed_users" android:required="true" />
+
+    <permission-group android:name="${applicationId}.permission-group.PACKAGE_ACCESS"
+                      android:label="@string/permission_group_control_space_apps_label"
+                      android:description="@string/permission_group_control_space_apps_description"
+                      android:icon="@drawable/ic_landscape_black_24dp" />
+
+    <permission android:name="${applicationId}.permission.FREEZE_PACKAGE"
+                android:permissionGroup="${applicationId}.permission-group.PACKAGE_ACCESS"
+                android:protectionLevel="dangerous"
+                android:label="@string/permission_freeze_app_label"
+                android:description="@string/permission_freeze_app_description" />
+
+    <permission android:name="${applicationId}.permission.LAUNCH_PACKAGE"
+                android:permissionGroup="${applicationId}.permission-group.PACKAGE_ACCESS"
+                android:protectionLevel="dangerous"
+                android:label="@string/permission_launch_app_label"
+                android:description="@string/permission_launch_app_description" />
+
+    <permission android:name="${applicationId}.permission.SUSPEND_PACKAGE"
+                android:permissionGroup="${applicationId}.permission-group.PACKAGE_ACCESS"
+                android:protectionLevel="dangerous"
+                android:label="@string/permission_suspend_app_label"
+                android:description="@string/permission_suspend_app_description" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- PrismProvisioning & ShuttleKeeper, required if targeting API 28+ -->
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> <!-- Required to start ACTION_INSTALL_PACKAGE since Android O -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- ShuttleProvider -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" /> <!-- TBD -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <application android:label="PrismSpace - Engine" tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
+
+        <activity android:name="com.yzddmr6.prismspace.api.ApiActivity"
+                  android:hardwareAccelerated="false"
+                  android:resumeWhilePausing="true"
+                  android:excludeFromRecents="true"
+                  android:alwaysRetainTaskState="true"
+                  android:taskAffinity=":api"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.FREEZE" />
+                <action android:name="com.yzddmr6.prismspace.action.UNFREEZE" />
+                <action android:name="com.yzddmr6.prismspace.action.LAUNCH" />
+                <action android:name="com.yzddmr6.prismspace.action.SUSPEND" />
+                <action android:name="com.yzddmr6.prismspace.action.UNSUSPEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+                <data android:scheme="packages" /> <!-- ssp: comma-separated package names -->
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.yzddmr6.prismspace.home.DummyHomeActivity"
+                  android:theme="@android:style/Theme.NoDisplay"
+                  android:hardwareAccelerated="false"
+                  android:enabled="false"
+                  android:directBootAware="true"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="com.yzddmr6.prismspace.api.ApiReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.yzddmr6.prismspace.action.FREEZE" />
+                <action android:name="com.yzddmr6.prismspace.action.UNFREEZE" />
+                <action android:name="com.yzddmr6.prismspace.action.LAUNCH" />
+                <action android:name="com.yzddmr6.prismspace.action.SUSPEND" />
+                <action android:name="com.yzddmr6.prismspace.action.UNSUSPEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+                <data android:scheme="packages" /> <!-- ssp: comma-separated package names -->
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.yzddmr6.prismspace.service.PrismPersistentService"
+                 android:permission="android.permission.BIND_DEVICE_ADMIN" android:exported="true" tools:targetApi="26">
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <provider android:authorities="${applicationId}.settings"
+                  android:name="com.yzddmr6.prismspace.settings.AppSettingsProvider"
+                  android:exported="false" />
+
+        <service android:name="com.yzddmr6.prismspace.provisioning.PrismProvisioning" android:exported="false"
+                 android:foregroundServiceType="shortService"
+                 android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.app.action.PROVISION_MANAGED_PROFILE" /> <!-- For re-provisioning procedure, see PrismSettingsFragment -->
+                <action android:name="android.app.action.PROVISION_MANAGED_DEVICE" />
+            </intent-filter>
+        </service>
+        <activity android:name="com.yzddmr6.prismspace.provisioning.PrismProvisioning$CompletionActivity"
+                  android:permission="android.permission.BIND_DEVICE_ADMIN"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true" android:directBootAware="true"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.PROVISIONING_SUCCESSFUL" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="com.yzddmr6.prismspace.PrismDeviceAdminReceiver"
+                  android:permission="android.permission.BIND_DEVICE_ADMIN" android:exported="true">
+            <meta-data android:name="android.app.device_admin" android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.yzddmr6.prismspace.provisioning.ManualProvisioningReceiver" android:exported="false" android:directBootAware="true">
+            <intent-filter android:priority="9999"> <!-- High priority to ensure being executed as early as possible -->
+                <action android:name="android.intent.action.USER_INITIALIZE" />
+                <action android:name="android.app.action.DEVICE_OWNER_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <provider android:name="com.yzddmr6.prismspace.provisioning.AutoIncrementalProvision"
+            android:authorities="${applicationId}.AIP" android:exported="false" android:initOrder="999" />
+
+        <receiver android:name="com.yzddmr6.prismspace.AppUpdateReceiver" android:exported="false" android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

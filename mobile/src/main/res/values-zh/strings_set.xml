@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SettingsScreen.kt -->
+    <string name="lz_set_title">设置</string>
+    <string name="lz_set_run_mode">运行模式</string>
+    <string name="lz_set_check_update_title">检查更新</string>
+    <string name="lz_set_check_update_summary">点按检查是否有新版本</string>
+    <string name="lz_set_update_title">发现新版本 %1$s</string>
+    <string name="lz_set_update_download">前往下载</string>
+    <string name="lz_set_update_later">稍后</string>
+    <string name="lz_set_suspend_title">冻结整个空间</string>
+    <string name="lz_set_suspend_summary">一次冻结你的所有分身并停止其后台进程；关闭开关即可解冻，数据不丢失</string>
+    <string name="lz_set_repair_title">修复双开空间</string>
+    <string name="lz_set_repair_summary">重建工作资料连接，期间分身将关闭</string>
+    <string name="lz_set_create_title">创建双开空间</string>
+    <string name="lz_set_create_summary">创建新的 Android 工作资料，用于运行分身应用</string>
+    <string name="lz_set_delete_space_title">删除双开空间</string>
+    <string name="lz_set_delete_space_summary">永久删除双开空间及其中所有分身数据</string>
+    <string name="lz_set_export_logs_title">导出诊断日志</string>
+    <string name="lz_set_export_logs_summary">导出 2MB 滚动详细日志和当前系统快照</string>
+    <string name="lz_set_about_title">关于棱镜空间 (PrismSpace)</string>
+    <string name="lz_set_about_summary">项目介绍</string>
+    <string name="lz_set_cancel">取消</string>
+
+    <!-- ModeGuideSheet.kt -->
+    <string name="lz_set_mode_normal_title">普通模式</string>
+    <string name="lz_set_mode_normal_summary">无需额外授权，核心双开、启动、冻结、文件传输均可用</string>
+    <string name="lz_set_mode_shizuku_summary">增强克隆与跨用户操作，需连接 Shizuku 服务</string>
+    <string name="lz_set_mode_root_summary">高级修复与诊断，需授予 Root 权限</string>
+    <string name="lz_set_shizuku_intro">Shizuku 让 PrismSpace 以 ADB 权限增强克隆与跨用户操作。</string>
+    <string name="lz_set_shizuku_step1">第 1 步  安装并打开 Shizuku 应用。</string>
+    <string name="lz_set_shizuku_step2">第 2 步  用「无线调试」配对，或连接电脑执行 ADB 启动 Shizuku；有 Root 时可在 Shizuku 内一键启动。</string>
+    <string name="lz_set_shizuku_step3">第 3 步  回到本页，点下方按钮检查并授权连接。</string>
+    <string name="lz_set_shizuku_check_button">检查 Shizuku 连接</string>
+
+    <!-- AboutSheet.kt -->
+    <string name="lz_set_about_intro">面向 Android 的双开空间管理器。在系统工作资料之上提供独立运行环境，让同一应用以多个账号并行存在，彼此数据互不干扰。</string>
+</resources>
