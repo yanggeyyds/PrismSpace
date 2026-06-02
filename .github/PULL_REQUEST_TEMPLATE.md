@@ -20,4 +20,22 @@ Describe the change and the motivation. Link the issue (`Closes #…`).
 - [ ] Licensing/attribution preserved
 - [ ] User-facing behavior is documented or explained in the PR when relevant
 
+## Release notes
+
+Apply exactly one release note label before requesting review:
+
+- `release: breaking`
+- `release: feature`
+- `release: fix`
+- `release: improvement`
+- `release: performance`
+- `release: refactor`
+- `release: docs`
+- `release: build`
+- `release: dependencies`
+- `release: tests`
+- `release: skip`
+
+Use `release: skip` only when the PR should not appear in generated release notes.
+
 ## Notes for reviewers

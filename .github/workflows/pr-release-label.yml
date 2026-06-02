@@ -1,0 +1,69 @@
+name: PR Release Label
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-release-label-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate release note label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require exactly one release label
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          allowed = [
+              "release: breaking",
+              "release: feature",
+              "release: fix",
+              "release: improvement",
+              "release: performance",
+              "release: refactor",
+              "release: docs",
+              "release: build",
+              "release: dependencies",
+              "release: tests",
+              "release: skip",
+          ]
+
+          labels = json.loads(os.environ["LABELS_JSON"])
+          release_labels = [label for label in labels if label in allowed]
+
+          if len(release_labels) == 1:
+              print(f"Release label: {release_labels[0]}")
+              sys.exit(0)
+
+          print("Pull requests must have exactly one release note label.", file=sys.stderr)
+          print("", file=sys.stderr)
+          print("Allowed labels:", file=sys.stderr)
+          for label in allowed:
+              print(f"- {label}", file=sys.stderr)
+          print("", file=sys.stderr)
+          if not release_labels:
+              print("Current release labels: none", file=sys.stderr)
+          else:
+              print("Current release labels:", ", ".join(release_labels), file=sys.stderr)
+          sys.exit(1)
+          PY

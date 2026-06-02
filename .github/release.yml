@@ -1,0 +1,32 @@
+changelog:
+  exclude:
+    labels:
+      - "release: skip"
+  categories:
+    - title: Breaking Changes
+      labels:
+        - "release: breaking"
+    - title: New Features
+      labels:
+        - "release: feature"
+    - title: Bug Fixes
+      labels:
+        - "release: fix"
+    - title: Improvements
+      labels:
+        - "release: improvement"
+    - title: Performance
+      labels:
+        - "release: performance"
+    - title: Technical Changes
+      labels:
+        - "release: refactor"
+        - "release: build"
+        - "release: dependencies"
+        - "release: tests"
+    - title: Documentation
+      labels:
+        - "release: docs"
+    - title: Other Changes
+      labels:
+        - "*"
