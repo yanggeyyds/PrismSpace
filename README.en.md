@@ -10,19 +10,19 @@
 
 # PrismSpace
 
-**An Android work-profile app-cloning manager. It uses system-level isolation to create a separate space, then installs, runs and manages your app clones.**
+**Lightweight, native app cloning powered by Android Work Profile**
 
 <p>
-<img alt="version" src="https://img.shields.io/badge/version-0.0.1-3F6FED">
-<img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-blue">
-<img alt="platform" src="https://img.shields.io/badge/Android-16%20(minSdk%2024)-3DDC84">
+<a href="https://github.com/yzddmr6/PrismSpace/releases"><img alt="version" src="https://img.shields.io/github/v/release/yzddmr6/PrismSpace?color=3F6FED&label=version"></a>
+<a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-blue"></a>
+<img alt="platform" src="https://img.shields.io/badge/Android-7.0%2B-3DDC84">
 <a href="https://github.com/yzddmr6/PrismSpace/stargazers"><img alt="stars" src="https://img.shields.io/github/stars/yzddmr6/PrismSpace?style=flat"></a>
 <a href="https://github.com/yzddmr6/PrismSpace/releases"><img alt="downloads" src="https://img.shields.io/github/downloads/yzddmr6/PrismSpace/total"></a>
 </p>
 
 </div>
 
-PrismSpace places app copies inside Android's native **managed profile / work profile**. The main space and the dual space are two system user environments, so app data, accounts, storage and package state are isolated. The main-space PrismSpace orchestrates everything and offers the Normal / Shizuku / Root run modes; the Profile Owner inside the dual space applies system policy: space creation, system-component enablement, app launch/freeze and APK synchronization. Cross-space file transfer goes through the system share sheet.
+PrismSpace creates a truly isolated dual space at the system level — app data, accounts and storage are fully separated with better compatibility and zero runtime overhead. Built on Android's native work-profile capability, it takes a fundamentally different approach from virtualization-based solutions like Parallel Space. It supports Normal, Shizuku and Root run modes.
 
 <div align="center">
 <table>
@@ -32,22 +32,42 @@ PrismSpace places app copies inside Android's native **managed profile / work pr
 <td><img src="docs/screenshots/app-detail.png" alt="App actions" width="240"></td>
 </tr>
 <tr>
-<td align="center">Home: space status, run mode and primary action</td>
+<td align="center">Home: space status and primary actions</td>
 <td align="center">Space: main/dual app lists</td>
-<td align="center">Action sheet: launch, freeze, uninstall and app info</td>
+<td align="center">Action sheet: launch, freeze, uninstall</td>
 </tr>
 </table>
 </div>
 
-## What It Is
+## ✨ Features
 
-PrismSpace uses Android's official work-profile capability and installs cloned apps into a separate profile.
+🔒 **System-Level Isolation** — Built on Android managed profiles. The main space and dual space are two independent system user environments with fully separated data — not in-process virtualization.
 
-- **Main space**: the user's normal personal space and the home of the full PrismSpace UI.
-- **Dual space**: an Android managed profile that runs cloned apps and stores their isolated data.
-- **Prism-Dual Space**: the visible profile-side entry for transfer history, guidance on sending files back to the main space, and Normal-mode foreground install.
-- **Normal mode**: PrismSpace copies the full APK set and the user confirms through Android's system installer.
-- **Enhanced modes**: Shizuku or Root can provide automatic cloning and selected space-maintenance tools after authorization.
+📦 **No Root Required** — Normal mode works out of the box: create the space, clone apps, manage twins and transfer files. Root and Shizuku are optional enhancements.
+
+⚙️ **Full App Management** — Clone, launch, freeze, unfreeze and uninstall app twins. Automatically handles multi-module packages. One-stop management for all your cloned apps.
+
+📂 **Cross-Space File Transfer** — Move files between the main space and dual space through the system share sheet, with the system save panel writing into the target space.
+
+⚡ **Lightweight & Native** — Apps run directly inside a system-level profile with no virtualization runtime overhead. Compatibility matches a native install.
+
+## 🚀 Quick Start
+
+1. Download and install the APK from [Releases](https://github.com/yzddmr6/PrismSpace/releases).
+2. Open PrismSpace and follow the setup wizard to create the dual space (Android work-profile flow).
+3. Open the Space tab and choose an app to clone from the main space.
+4. In Normal mode the complete package syncs to the dual space; tap Install in Prism-Dual Space and confirm.
+5. Once installed, use the Space tab to launch, freeze or uninstall the cloned app.
+
+To build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Run Modes
+
+All three modes can launch, freeze, uninstall cloned apps and transfer files across spaces. The difference is in how apps are cloned and what space-maintenance tools are available:
+
+- **Normal** — Copies the complete package to the dual space; the user confirms through the system installer. Zero prerequisites, no extra permissions needed.
+- **Shizuku / ADB** — Clones automatically after authorization, no manual install confirmation required.
+- **Root** — Automatic cloning + can assist with creating, repairing and deleting the dual space.
 
 ## Architecture At A Glance
 
@@ -65,101 +85,57 @@ flowchart LR
 
     User --> Main
     Main -- "create, repair, Profile Owner policy" --> Profile
-    Main -- "Normal mode: copy base + splits" --> Entry
-    Entry -- "PackageInstaller session" --> Installer
+    Main -- "Normal mode: copy package" --> Entry
+    Entry -- "system install flow" --> Installer
     Installer --> Apps
     Main -- "Enhanced mode" --> Privileged --> Apps
-    Main -- "system share / ACTION_CREATE_DOCUMENT" --> Files --> Profile
+    Main -- "system share / file save" --> Files --> Profile
     Entry -- "open file manager / install APK" --> Files
     Main --> Diagnostics
     Entry --> Diagnostics
 ```
 
-The main app manages and orchestrates. Profile Owner code applies system policy in the dual space. Android's system UI handles key install, share and file-save confirmations.
-
-## Features
-
-- **App cloning**: clone main-space apps into the dual space with separate account and data state.
-- **System-level isolation**: built on Android managed profiles — real OS-level isolation, not in-process virtualization, so main-space and dual-space app data never mix.
-- **App management**: launch, freeze, unfreeze, uninstall twins, and open system app-info pages.
-- **Visible system apps**: system apps are shown by default because file, install, browser and settings flows depend on them.
-- **Normal install**: copy the complete APK set, then confirm installation in the dual space with the system installer.
-- **Shizuku/Root enhancement**: after authorization, automatically clone installed packages and use selected maintenance tools.
-- **File transfer**: use the system share sheet to choose Personal/Work, then the system save panel to write into the target space.
-- **Local diagnostics**: export a 2 MiB rolling log, system snapshot, dual-space snapshot and filtered logcat.
-- **Update check**: fetch newer release information from GitHub Releases.
-- **PrismProbe**: companion verifier for files, permissions, notifications, background behavior and networking inside the dual space.
-
-Core space-management, install and file-transfer flows run locally on the device. Update checks, PrismProbe network tests and diagnostic sharing only run when the user triggers them.
-
-## Quick Start
-
-1. Download and install the APK from [Releases](https://github.com/yzddmr6/PrismSpace/releases).
-2. Open PrismSpace and follow Android's work-profile provisioning flow to create the dual space.
-3. Open the Space tab, switch to the main-space list, and choose an app to clone.
-4. In Normal mode, PrismSpace syncs the full installer into the dual space; tap Install in Prism-Dual Space and confirm in the system installer.
-5. After installation, use the Space tab to launch, freeze or uninstall the cloned app.
-
-To build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Run Modes And Capability Matrix
-
-| Capability | Normal | Shizuku / ADB | Root |
-| --- | --- | --- | --- |
-| Create the dual space | System work-profile flow | Same as Normal | Can assist creation/repair |
-| Launch, freeze, unfreeze, uninstall twins | Supported | Supported | Supported |
-| Clone system apps | Enable system app in the dual space | Same as Normal | Same as Normal |
-| Clone ordinary user apps | Copy complete APK set, user confirms install | Automatic clone for installed apps | Automatic clone for installed apps |
-| Split APKs | Prism-Dual Space installs the complete set | Complete set included automatically | Complete set included automatically |
-| External APK tap | Handled by Android's system installer UI | Same as Normal | Same as Normal |
-| Delete/recreate space | System-guided path | Same as Normal | Enhanced delete/create path |
-
-Normal mode is suitable for everyday use without extra authorization. Shizuku and Root modes are for users who want fewer manual steps or additional maintenance tools.
-
-## Normal Install Flow
-
-Normal mode follows Android's standard install flow:
-
-1. PrismSpace collects the source app's base APK and split APKs from the main space.
-2. The complete set is copied into the dual space and recorded in both spaces' transfer histories.
-3. The user can find the APK from the PrismSpace Files tab, Prism-Dual Space, the system file manager or MT Manager.
-4. A single APK opens Android's system installer UI. If Android asks to allow this install source, grant it and continue.
-5. A split APK set continues from the Install action in Prism-Dual Space, then Android shows the final installer confirmation.
-
-## Files And Diagnostics
-
-Cross-space file transfer uses the system share sheet. The user shares a file from the source app, chooses the Personal or Work tab, then selects "Import into this space PrismSpace". The receiving side immediately reads the granted URI, copies it to a temporary file, and uses `ACTION_CREATE_DOCUMENT` so the user chooses the final save location.
-
-The Files tab and Prism-Dual Space both show transfer history for their own user space. Tapping a record opens the system file manager; APK records add a separate Install action so split APK sets are not treated as a single file.
-
-Diagnostics are exported only when the user chooses to share them. The shared text attachment contains the current space's 2 MiB rolling log, system information, a dual-space snapshot and filtered logcat lines related to install, file and space-state flows.
+The main app orchestrates everything. Profile Owner code applies system policy inside the dual space. Android's own system UI handles install, share and file-save confirmations.
 
 ## FAQ
 
+**What are the device requirements?**
+
+Android 7.0 or above. The device must not already have another work profile or work space (Android allows only one work profile per user). Root or an unlocked bootloader is not required.
+
 **Do I need Root or Shizuku?**
 
-Not for the core flow. Normal mode can create the dual space, manage cloned apps, transfer files and install apps. Shizuku/Root adds automatic cloning and selected maintenance tools.
+No. Normal mode handles the full workflow: creating the space, cloning apps, transferring files and installing. Shizuku/Root add automatic cloning and other enhancements.
 
-**How do I install split apps?**
+**What if space creation fails?**
 
-Use the Install action in Prism-Dual Space. PrismSpace passes the base APK and splits together to Android's installer confirmation.
+Some device manufacturers restrict the work-profile feature. Make sure no other work space is already active, then use Settings → Export diagnostic logs and attach the output to your issue report.
 
 **How do I export debugging information?**
 
-Use Settings -> Export diagnostic logs. The shared attachment includes diagnostic snapshots for the main and dual spaces and is suitable for issue reports.
+Settings → Export diagnostic logs, then share the text attachment. It includes diagnostic snapshots for both the main and dual spaces.
 
 ## Contributing
 
 Issues and PRs are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for development and build instructions.
 
-## Licensing
+## 📖 Further Reading
+
+- [PrismSpace: The 4-Billion-Token Android Dual-Space Rebuild](https://mp.weixin.qq.com/s/NSQOABIqwg6seNOwmBfhrQ) (in Chinese)
+
+## License
 
 PrismSpace is distributed under the **GNU General Public License v3.0**, see [LICENSE](LICENSE).
 
 ## Credits
 
-Built on [Island](https://github.com/oasisfeng/island) by Oasis Feng and contributors. Thanks also to [Shelter](https://github.com/PeterCxy/Shelter), [Insular](https://gitea.angry.im/PeterCxy/Insular), [Shizuku](https://shizuku.rikka.app/) and AndroidX / Jetpack Compose.
+This project is **rebuilt** from [Island](https://github.com/oasisfeng/island) by Oasis Feng and contributors. Thanks also to [Shelter](https://github.com/PeterCxy/Shelter), [Insular](https://gitea.angry.im/PeterCxy/Insular), [Shizuku](https://shizuku.rikka.app/) and AndroidX / Jetpack Compose.
 
----
+## 💬 Contact & Feedback
 
-For use on devices you own or are authorized to manage. This software is provided as-is under the GPL, with no warranty.
+For bug reports or technical discussion, follow the WeChat public account:
+
+<div align="center">
+<img src="docs/brand/wechat-qrcode.png" alt="WeChat QR Code" width="360">
+</div>
+
