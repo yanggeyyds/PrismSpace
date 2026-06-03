@@ -1,5 +1,7 @@
 package com.yzddmr6.prismspace.prism.compose.screen
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +55,8 @@ import com.yzddmr6.prismspace.prism.compose.component.RepairConfirmSheet
 import com.yzddmr6.prismspace.prism.compose.component.SwitchRow
 import com.yzddmr6.prismspace.prism.compose.theme.PrismSpacing
 import com.yzddmr6.prismspace.mobile.R
+import com.yzddmr6.prismspace.prism.compose.vm.ActionFeedback
+import com.yzddmr6.prismspace.prism.compose.vm.AppFeedbackBus
 import com.yzddmr6.prismspace.prism.compose.vm.PrismMode
 import com.yzddmr6.prismspace.prism.compose.vm.prismModeLabelRes
 import com.yzddmr6.prismspace.prism.compose.vm.SettingsViewModel
@@ -158,6 +162,28 @@ fun SettingsScreen(nav: NavHostController) {
                     summary = stringResource(R.string.lz_set_export_logs_summary),
                     leadingIcon = Icons.Outlined.IosShare,
                     onClick = { vm.exportLogs(context) },
+                )
+            }
+
+            // Feedback and discussion.
+            GroupCard(title = null) {
+                val feedbackAccount = stringResource(R.string.lz_set_feedback_account)
+                val feedbackCopied = stringResource(R.string.lz_set_feedback_copied)
+                val copyFeedbackAccount = {
+                    context.getSystemService(ClipboardManager::class.java)
+                        ?.setPrimaryClip(ClipData.newPlainText(feedbackAccount, feedbackAccount))
+                    AppFeedbackBus.emit(ActionFeedback(feedbackCopied, isError = false))
+                }
+                ActionRow(
+                    title = stringResource(R.string.lz_set_feedback_title),
+                    summary = stringResource(R.string.lz_set_feedback_summary, feedbackAccount),
+                    leadingIcon = PrismIcons.Info,
+                    trailing = {
+                        TextButton(onClick = copyFeedbackAccount) {
+                            Text(stringResource(R.string.lz_set_feedback_copy))
+                        }
+                    },
+                    onClick = copyFeedbackAccount,
                 )
             }
 

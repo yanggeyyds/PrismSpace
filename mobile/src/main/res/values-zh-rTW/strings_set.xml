@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SettingsScreen.kt -->
+    <string name="lz_set_feedback_title">回饋與交流</string>
+    <string name="lz_set_feedback_summary">有問題回饋或交流討論，微信搜尋「%1$s」。</string>
+    <string name="lz_set_feedback_account">熵减矩阵</string>
+    <string name="lz_set_feedback_copy">複製</string>
+    <string name="lz_set_feedback_copied">已複製公眾號名稱</string>
+</resources>

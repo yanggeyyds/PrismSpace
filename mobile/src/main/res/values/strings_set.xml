@@ -18,6 +18,11 @@
     <string name="lz_set_delete_space_summary">Permanently removes the dual space and all clone data inside it</string>
     <string name="lz_set_export_logs_title">Export diagnostic logs</string>
     <string name="lz_set_export_logs_summary">Exports a detailed 2 MB rolling log and current system snapshot</string>
+    <string name="lz_set_feedback_title">Feedback and discussion</string>
+    <string name="lz_set_feedback_summary">For feedback and discussion, search WeChat for “%1$s”.</string>
+    <string name="lz_set_feedback_account">熵减矩阵</string>
+    <string name="lz_set_feedback_copy">Copy</string>
+    <string name="lz_set_feedback_copied">WeChat account name copied</string>
     <string name="lz_set_about_title">About PrismSpace (棱镜空间)</string>
     <string name="lz_set_about_summary">Project intro</string>
     <string name="lz_set_cancel">Cancel</string>
