@@ -67,7 +67,7 @@ dependencies {
     implementation 'dev.rikka.shizuku:api:12.1.0'
     implementation 'dev.rikka.shizuku:provider:12.1.0'
 
-    implementation 'io.github.iamr0s:Dhizuku-API:1.2'
+    implementation 'io.github.iamr0s:Dhizuku-API:2.5.4'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'         // Implementation for @Preview (only needed by Android Studio)
 

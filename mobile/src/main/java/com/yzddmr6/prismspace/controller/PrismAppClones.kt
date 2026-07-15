@@ -370,7 +370,7 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 								} finally {
 									data.recycle()
 									reply.recycle()
-									runCatching { Dhizuku.unbindUserService(args, conn, true) }
+									runCatching { Dhizuku.unbindUserService(conn) }
 								}
 							}
 							DiagnosticLog.i(TAG, "Dhizuku clone result pkg=$pkg targetUser=${target.toId()} result=$result")
@@ -393,7 +393,7 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 				}
 				main.postDelayed({
 					if (done.compareAndSet(false, true)) {
-						runCatching { Dhizuku.unbindUserService(args, conn, true) }
+						runCatching { Dhizuku.unbindUserService(conn) }
 						fail()
 					}
 				}, 20_000)
