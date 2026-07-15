@@ -22,7 +22,7 @@
 
 </div>
 
-PrismSpace creates a truly isolated dual space at the system level — app data, accounts and storage are fully separated with better compatibility and zero runtime overhead. Built on Android's native work-profile capability, it takes a fundamentally different approach from virtualization-based solutions like Parallel Space. It supports Normal, Shizuku and Root run modes.
+PrismSpace creates a truly isolated dual space at the system level — app data, accounts and storage are fully separated with better compatibility and zero runtime overhead. Built on Android's native work-profile capability, it takes a fundamentally different approach from virtualization-based solutions like Parallel Space. It supports Normal, Shizuku, Dhizuku and Root run modes.
 
 <div align="center">
 <table>
@@ -43,7 +43,7 @@ PrismSpace creates a truly isolated dual space at the system level — app data,
 
 🔒 **System-Level Isolation** — Built on Android managed profiles. The main space and dual space are two independent system user environments with fully separated data — not in-process virtualization.
 
-📦 **No Root Required** — Normal mode works out of the box: create the space, clone apps, manage twins and transfer files. Root and Shizuku are optional enhancements.
+📦 **No Root Required** — Normal mode works out of the box: create the space, clone apps, manage twins and transfer files. Shizuku, Dhizuku and Root are optional enhancements.
 
 ⚙️ **Full App Management** — Clone, launch, freeze, unfreeze and uninstall app twins. Automatically handles multi-module packages. One-stop management for all your cloned apps.
 
@@ -63,10 +63,11 @@ To build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Run Modes
 
-All three modes can launch, freeze, uninstall cloned apps and transfer files across spaces. The difference is in how apps are cloned and what space-maintenance tools are available:
+All four modes can launch, freeze, uninstall cloned apps and transfer files across spaces. The difference is in how apps are cloned and what space-maintenance tools are available:
 
 - **Normal** — Copies the complete package to the dual space; the user confirms through the system installer. Zero prerequisites, no extra permissions needed.
-- **Shizuku / ADB** — Clones automatically after authorization, no manual install confirmation required.
+- **Shizuku / ADB** — Clones automatically after authorization, no manual install confirmation required. Requires starting the Shizuku service (activated via ADB or Root; resets after reboot).
+- **Dhizuku** — Clones automatically by sharing Device Owner privileges via Dhizuku. Activated once and persists across reboots, no repeated authorization needed.
 - **Root** — Automatic cloning + can assist with creating, repairing and deleting the dual space.
 
 ## Architecture At A Glance
@@ -80,7 +81,7 @@ flowchart LR
     Apps["Cloned apps"]
     Installer["Android system installer"]
     Files["System share sheet<br/>and save panel"]
-    Privileged["Shizuku / Root<br/>enhanced cloning"]
+    Privileged["Shizuku / Dhizuku / Root<br/>enhanced cloning"]
     Diagnostics["Local diagnostic log<br/>dual-space snapshot"]
 
     User --> Main
@@ -103,9 +104,9 @@ The main app orchestrates everything. Profile Owner code applies system policy i
 
 Android 7.0 or above. The device must not already have another work profile or work space (Android allows only one work profile per user). Root or an unlocked bootloader is not required.
 
-**Do I need Root or Shizuku?**
+**Do I need Root, Shizuku or Dhizuku?**
 
-No. Normal mode handles the full workflow: creating the space, cloning apps, transferring files and installing. Shizuku/Root add automatic cloning and other enhancements.
+No. Normal mode handles the full workflow: creating the space, cloning apps, transferring files and installing. Shizuku, Dhizuku and Root add automatic cloning and other enhancements.
 
 **What if space creation fails?**
 
@@ -129,7 +130,7 @@ PrismSpace is distributed under the **GNU General Public License v3.0**, see [LI
 
 ## Credits
 
-This project is **rebuilt** from [Island](https://github.com/oasisfeng/island) by Oasis Feng and contributors. Thanks also to [Shelter](https://github.com/PeterCxy/Shelter), [Insular](https://gitea.angry.im/PeterCxy/Insular), [Shizuku](https://shizuku.rikka.app/) and AndroidX / Jetpack Compose.
+This project is **rebuilt** from [Island](https://github.com/oasisfeng/island) by Oasis Feng and contributors. Thanks also to [Shelter](https://github.com/PeterCxy/Shelter), [Insular](https://gitea.angry.im/PeterCxy/Insular), [Shizuku](https://shizuku.rikka.app/), [Dhizuku](https://github.com/iamr0s/Dhizuku) and AndroidX / Jetpack Compose.
 
 ## 💬 Contact & Feedback
 

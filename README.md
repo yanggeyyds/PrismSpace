@@ -22,7 +22,7 @@
 
 </div>
 
-PrismSpace 在系统层面创建真正隔离的双开空间——应用数据、账号、存储完全分开，兼容性更好，性能无额外开销。基于 Android 原生工作资料能力实现，不同于平行空间等虚拟化方案。支持普通、Shizuku、Root 三种运行模式。
+PrismSpace 在系统层面创建真正隔离的双开空间——应用数据、账号、存储完全分开，兼容性更好，性能无额外开销。基于 Android 原生工作资料能力实现，不同于平行空间等虚拟化方案。支持普通、Shizuku、Dhizuku、Root 四种运行模式。
 
 <div align="center">
 <table>
@@ -43,7 +43,7 @@ PrismSpace 在系统层面创建真正隔离的双开空间——应用数据、
 
 🔒 **系统级隔离** — 基于 Android managed profile，主空间和双开空间是两个独立的系统用户环境，数据彼此不可见，不是进程内虚拟化。
 
-📦 **无需 Root 即可使用** — 普通模式零门槛，创建空间、克隆应用、管理分身、传输文件全部可用。Root 和 Shizuku 是可选增强。
+📦 **无需 Root 即可使用** — 普通模式零门槛，创建空间、克隆应用、管理分身、传输文件全部可用。Shizuku、Dhizuku 和 Root 是可选增强。
 
 ⚙️ **完整的应用管理** — 克隆、启动、冻结、解冻、卸载应用分身，自动处理多模块安装包，一站式管理双开应用。
 
@@ -63,10 +63,11 @@ PrismSpace 在系统层面创建真正隔离的双开空间——应用数据、
 
 ## 运行模式
 
-三种模式都可以启动、冻结、卸载双开应用和跨空间传输文件，区别在于应用克隆方式和空间维护能力：
+四种模式都可以启动、冻结、卸载双开应用和跨空间传输文件，区别在于应用克隆方式和空间维护能力：
 
 - **普通模式** — 复制完整安装包到双开空间，用户在系统安装器中确认安装。零门槛，无需额外权限。
-- **Shizuku / ADB 模式** — 授权后自动克隆，无需手动确认安装。
+- **Shizuku / ADB 模式** — 授权后自动克隆，无需手动确认安装。需启动 Shizuku 服务（ADB 或 Root 激活，重启后失效）。
+- **Dhizuku 模式** — 通过 Dhizuku 共享设备所有者权限，自动克隆。激活一次后重启依然生效，无需重复授权。
 - **Root 模式** — 自动克隆 + 可辅助创建、修复和删除双开空间。
 
 ## 架构速览
@@ -80,7 +81,7 @@ flowchart LR
     Apps["双开应用"]
     Installer["Android 系统安装器"]
     Files["系统分享与文件保存面板"]
-    Privileged["Shizuku / Root<br/>增强克隆"]
+    Privileged["Shizuku / Dhizuku / Root<br/>增强克隆"]
     Diagnostics["本地诊断日志<br/>双空间快照"]
 
     User --> Main
@@ -103,9 +104,9 @@ flowchart LR
 
 Android 7.0 及以上系统。设备上不能已有其他工作资料或工作空间（Android 限制每个用户只能有一个工作资料）。不需要 Root 或解锁 Bootloader。
 
-**一定要 Root 或 Shizuku 吗？**
+**一定要 Root、Shizuku 或 Dhizuku 吗？**
 
-不需要。普通模式可以完成创建空间、克隆应用、文件传输和安装的全部流程。Shizuku/Root 提供自动克隆等增强能力。
+不需要。普通模式可以完成创建空间、克隆应用、文件传输和安装的全部流程。Shizuku、Dhizuku 和 Root 提供自动克隆等增强能力。
 
 **空间创建失败怎么办？**
 
@@ -129,7 +130,7 @@ PrismSpace 以 **GNU GPL v3.0** 分发，见 [LICENSE](LICENSE)。
 
 ## 致谢
 
-本项目基于 Oasis Feng 及贡献者的 [Island](https://github.com/oasisfeng/island) **重构**而来。同时感谢 [Shelter](https://github.com/PeterCxy/Shelter)、[Insular](https://gitea.angry.im/PeterCxy/Insular)、[Shizuku](https://shizuku.rikka.app/) 以及 AndroidX / Jetpack Compose。
+本项目基于 Oasis Feng 及贡献者的 [Island](https://github.com/oasisfeng/island) **重构**而来。同时感谢 [Shelter](https://github.com/PeterCxy/Shelter)、[Insular](https://gitea.angry.im/PeterCxy/Insular)、[Shizuku](https://shizuku.rikka.app/)、[Dhizuku](https://github.com/iamr0s/Dhizuku) 以及 AndroidX / Jetpack Compose。
 
 ## 💬 交流与反馈
 
