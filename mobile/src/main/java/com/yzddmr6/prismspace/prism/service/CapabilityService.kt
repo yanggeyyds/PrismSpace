@@ -9,6 +9,8 @@ class CapabilityService {
         profileOwner: Boolean,
         shizukuReady: Boolean,
         shizukuAvailable: Boolean = shizukuReady,
+        dhizukuReady: Boolean = false,
+        dhizukuAvailable: Boolean = dhizukuReady,
         adbReady: Boolean = false,
         rootDetected: Boolean,
         rootEnabled: Boolean,
@@ -18,6 +20,11 @@ class CapabilityService {
             shizukuReady -> CapabilityAvailability.Available
             shizukuAvailable -> CapabilityAvailability.NeedsSetup("Shizuku 等待授权")
             else -> CapabilityAvailability.NeedsSetup("Shizuku 未连接")
+        },
+        dhizuku = when {
+            dhizukuReady -> CapabilityAvailability.Available
+            dhizukuAvailable -> CapabilityAvailability.NeedsSetup("Dhizuku 等待授权")
+            else -> CapabilityAvailability.NeedsSetup("Dhizuku 未激活")
         },
         adb = if (adbReady) CapabilityAvailability.Available else CapabilityAvailability.NeedsSetup("ADB 未授权"),
         root = when {

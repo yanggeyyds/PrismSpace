@@ -49,11 +49,16 @@ class SharedPrefsModeStore(context: Context) : ModeStore {
 
 class DefaultCapabilityRepository(
     private val shizukuAuthorized: () -> Boolean = { ShizukuUtil.isAuthorized() },
+    private val dhizukuAuthorized: () -> Boolean = { false },
     private val modeStore: ModeStore = NoopModeStore,
 ) : CapabilityRepository {
     // Persisted choice wins; otherwise fall back to the original detect-once default.
     private val _selectedMode = MutableStateFlow(
-        modeStore.load() ?: if (shizukuAuthorized()) PrismMode.Shizuku else PrismMode.Normal
+        modeStore.load() ?: when {
+            shizukuAuthorized() -> PrismMode.Shizuku
+            dhizukuAuthorized() -> PrismMode.Dhizuku
+            else -> PrismMode.Normal
+        }
     )
     override val selectedMode: StateFlow<PrismMode> = _selectedMode
     override fun setSelectedMode(mode: PrismMode) {
@@ -68,6 +73,7 @@ object CapabilityRepositoryProvider {
     fun get(context: Context): CapabilityRepository =
         instance ?: synchronized(this) {
             instance ?: DefaultCapabilityRepository(
+                dhizukuAuthorized = { DhizukuUtil.isAuthorized(context.applicationContext) },
                 modeStore = SharedPrefsModeStore(context),
             ).also { instance = it }
         }

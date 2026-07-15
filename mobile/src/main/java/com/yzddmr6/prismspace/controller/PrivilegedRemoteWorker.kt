@@ -18,15 +18,16 @@ import com.yzddmr6.prismspace.shuttle.ContextShuttle
 class PrivilegedRemoteWorker: Binder() {
 
     /**
-     * Runs with privileged permission via Shizuku. installExistingPackage reports no synchronous
-     * result, so verify the real installed state for the target user instead of trusting dispatch.
+     * Runs with privileged permission via Shizuku or Dhizuku (both bind this worker into a privileged
+     * server process). installExistingPackage reports no synchronous result, so verify the real
+     * installed state for the target user instead of trusting dispatch.
      */
-    private fun cloneAppViaShizuku(context: Context, pkg: String, userId: Int): Boolean {
-        DiagnosticLog.i(TAG, "cloneAppViaShizuku start pkg=$pkg userId=$userId")
+    private fun cloneAppViaPrivileged(context: Context, pkg: String, userId: Int): Boolean {
+        DiagnosticLog.i(TAG, "cloneAppViaPrivileged start pkg=$pkg userId=$userId")
         val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId)) ?: return false
         val pm = profileContext.packageManager
         if (isInstalledForUser(pm, pkg)) {
-            DiagnosticLog.i(TAG, "cloneAppViaShizuku already installed pkg=$pkg userId=$userId")
+            DiagnosticLog.i(TAG, "cloneAppViaPrivileged already installed pkg=$pkg userId=$userId")
             return true
         }
         if (SDK_INT >= Q) {
@@ -39,20 +40,20 @@ class PrivilegedRemoteWorker: Binder() {
         // installed state (<=3s) and report ground truth instead of assuming success.
         repeat(20) {
             if (isInstalledForUser(pm, pkg)) {
-                DiagnosticLog.i(TAG, "cloneAppViaShizuku installed pkg=$pkg userId=$userId poll=$it")
+                DiagnosticLog.i(TAG, "cloneAppViaPrivileged installed pkg=$pkg userId=$userId poll=$it")
                 return true
             }
             try { Thread.sleep(150) } catch (e: InterruptedException) { Thread.currentThread().interrupt(); return isInstalledForUser(pm, pkg) }
         }
         val installed = isInstalledForUser(pm, pkg)
-        DiagnosticLog.i(TAG, "cloneAppViaShizuku finished pkg=$pkg userId=$userId installed=$installed")
+        DiagnosticLog.i(TAG, "cloneAppViaPrivileged finished pkg=$pkg userId=$userId installed=$installed")
         return installed
     }
 
     private fun isInstalledForUser(pm: PackageManager, pkg: String): Boolean =
         try { pm.getApplicationInfo(pkg, 0); true } catch (e: PackageManager.NameNotFoundException) { false }
 
-    private fun setAppOpModeViaShizuku(context: Context, pkg: String, userId: Int, op: String, mode: Int): Boolean {
+    private fun setAppOpModeViaPrivileged(context: Context, pkg: String, userId: Int, op: String, mode: Int): Boolean {
         val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId)) ?: return false
         val uid = profileContext.packageManager.getPackageUid(pkg, MATCH_DISABLED_COMPONENTS)
         val appOps = AppOpsCompat(profileContext)
@@ -73,10 +74,10 @@ class PrivilegedRemoteWorker: Binder() {
             val userId = data.readInt()
             DiagnosticLog.i(TAG, "onTransact clone pkg=$pkg userId=$userId")
             try {
-                val result = cloneAppViaShizuku(getSystemContext(), pkg, userId)
+                val result = cloneAppViaPrivileged(getSystemContext(), pkg, userId)
                 reply?.writeInt(if (result) 1 else 0) }
             catch (e: Exception) {
-                DiagnosticLog.e(TAG, "Error cloning $pkg via Shizuku", e)
+                DiagnosticLog.e(TAG, "Error cloning $pkg via privileged service", e)
                 reply?.writeInt(-1) }
             return true
         }
@@ -86,10 +87,10 @@ class PrivilegedRemoteWorker: Binder() {
             val op = data.readString()!!
             val mode = data.readInt()
             try {
-                val result = setAppOpModeViaShizuku(getSystemContext(), pkg, userId, op, mode)
+                val result = setAppOpModeViaPrivileged(getSystemContext(), pkg, userId, op, mode)
                 reply?.writeInt(if (result) 1 else 0) }
             catch (e: Exception) {
-                DiagnosticLog.e(TAG, "Error setting app-op $op to $mode for $pkg via Shizuku", e)
+                DiagnosticLog.e(TAG, "Error setting app-op $op to $mode for $pkg via privileged service", e)
                 reply?.writeInt(-1) }
             return true
         }
@@ -100,10 +101,10 @@ class PrivilegedRemoteWorker: Binder() {
         Thread {
             try { Thread.sleep(100) }
             catch (e: InterruptedException) { Thread.currentThread().interrupt() }
-            DiagnosticLog.i(TAG, "Exiting Shizuku user service process")
+            DiagnosticLog.i(TAG, "Exiting privileged user service process")
             Runtime.getRuntime().exit(0)
         }.apply {
-            name = "PrismShizukuWorkerExit"
+            name = "PrismPrivilegedWorkerExit"
             isDaemon = false
             start()
         }
@@ -120,7 +121,7 @@ class PrivilegedRemoteWorker: Binder() {
         throw UnsupportedOperationException()
     }
 
-    init { DiagnosticLog.i(TAG, "Running in Shizuku...") }
+    init { DiagnosticLog.i(TAG, "Running in privileged service...") }
 
     companion object {
         private const val INSTALL_SUCCEEDED = 1     // PackageManager.INSTALL_SUCCEEDED

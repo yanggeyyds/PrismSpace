@@ -4,12 +4,18 @@
     <string name="lz_setvm_mode_title">当前模式</string>
     <string name="lz_setvm_mode_body_not_created">双开空间未创建，请先完成初始设置。</string>
     <string name="lz_setvm_mode_body_shizuku">Shizuku 模式可用，增强能力已启用。</string>
+    <string name="lz_setvm_mode_body_dhizuku">Dhizuku 模式可用，设备所有者权限已启用。</string>
     <string name="lz_setvm_mode_body_normal">普通模式运行中，核心双开功能可用。</string>
 
     <!-- SettingsViewModel: mode switching feedback -->
     <string name="lz_setvm_switched_normal">已切换到普通模式</string>
     <string name="lz_setvm_shizuku_connected">已连接 Shizuku · 已切换到 Shizuku 模式</string>
     <string name="lz_setvm_shizuku_not_ready">Shizuku 未就绪，请先启动 Shizuku 服务并授权</string>
+    <string name="lz_setvm_dhizuku_connected">已授权 Dhizuku · 已切换到 Dhizuku 模式</string>
+    <string name="lz_setvm_dhizuku_requesting">正在申请 Dhizuku 授权…</string>
+    <string name="lz_setvm_dhizuku_not_ready">Dhizuku 未激活，请先安装并激活 Dhizuku。</string>
+    <string name="lz_setvm_dhizuku_denied">Dhizuku 授权被拒绝，模式未变更。</string>
+    <string name="lz_setvm_dhizuku_permission_failed">Dhizuku 授权请求失败: %1$s</string>
     <string name="lz_setvm_root_requesting">正在向系统申请 Root 授权…</string>
     <string name="lz_setvm_root_granted">已获得 Root 授权，已切换到 Root 模式</string>
     <string name="lz_setvm_root_denied">未获得 Root 授权，模式未变更</string>

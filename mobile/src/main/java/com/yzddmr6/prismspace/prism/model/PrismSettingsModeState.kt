@@ -7,12 +7,14 @@ import com.yzddmr6.prismspace.prism.compose.vm.zhFallback
 data class PrismSettingsModeState(
     val normal: PrismModeCard,
     val shizukuAdb: PrismModeCard,
+    val dhizuku: PrismModeCard,
     val root: PrismModeCard,
 ) {
     companion object {
         fun from(
             shizuku: PrismShizukuAdbStatus,
             root: PrismRootStatus,
+            dhizuku: PrismDhizukuStatus = PrismDhizukuStatus.NotActivated,
             res: StringResolver = zhFallback,
         ): PrismSettingsModeState = PrismSettingsModeState(
             normal = PrismModeCard(
@@ -29,6 +31,19 @@ data class PrismSettingsModeState(
                         PrismShizukuAdbStatus.WaitingAuthorization -> R.string.lz_vm_mode_shizuku_summary_waiting
                         PrismShizukuAdbStatus.NotRunning -> R.string.lz_vm_mode_shizuku_summary_not_running
                         PrismShizukuAdbStatus.NotInstalled -> R.string.lz_vm_mode_shizuku_summary_not_installed
+                    },
+                    emptyArray(),
+                ),
+            ),
+            dhizuku = PrismModeCard(
+                title = res(R.string.lz_vm_mode_dhizuku_title, emptyArray()),
+                status = res(dhizuku.labelRes, emptyArray()),
+                summary = res(
+                    when (dhizuku) {
+                        PrismDhizukuStatus.Ready -> R.string.lz_vm_mode_dhizuku_summary_ready
+                        PrismDhizukuStatus.WaitingAuthorization -> R.string.lz_vm_mode_dhizuku_summary_waiting
+                        PrismDhizukuStatus.NotActivated -> R.string.lz_vm_mode_dhizuku_summary_not_activated
+                        PrismDhizukuStatus.NotInstalled -> R.string.lz_vm_mode_dhizuku_summary_not_installed
                     },
                     emptyArray(),
                 ),
@@ -59,4 +74,11 @@ enum class PrismRootStatus(val labelRes: Int) {
     NotDetected(R.string.lz_vm_root_status_not_detected),
     AvailableButDisabled(R.string.lz_vm_root_status_available_disabled),
     Enabled(R.string.lz_vm_root_status_enabled),
+}
+
+enum class PrismDhizukuStatus(val labelRes: Int) {
+    NotInstalled(R.string.lz_vm_dhizuku_status_not_installed),
+    NotActivated(R.string.lz_vm_dhizuku_status_not_activated),
+    WaitingAuthorization(R.string.lz_vm_dhizuku_status_waiting),
+    Ready(R.string.lz_vm_dhizuku_status_ready),
 }

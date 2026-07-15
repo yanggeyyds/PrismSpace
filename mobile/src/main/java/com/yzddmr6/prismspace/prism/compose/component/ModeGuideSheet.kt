@@ -38,6 +38,7 @@ fun ModeGuideSheet(
     onDismiss: () -> Unit,
     onSetNormal: () -> Unit,
     onCheckShizuku: () -> Boolean,
+    onCheckDhizuku: () -> Boolean,
     onRequestRoot: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -58,6 +59,7 @@ fun ModeGuideSheet(
                 onDismiss()
             },
             onCheckShizuku = onCheckShizuku,
+            onCheckDhizuku = onCheckDhizuku,
         )
     }
 }
@@ -74,15 +76,18 @@ private fun ModeListPanel(
     onSetNormal: () -> Unit,
     onRequestRoot: () -> Unit,
     onCheckShizuku: () -> Boolean,
+    onCheckDhizuku: () -> Boolean,
 ) {
-    // All three mode rows now share one contract: tap the row = activate that mode.
+    // All mode rows now share one contract: tap the row = activate that mode.
     //  • 普通模式  → always succeeds → switch + close.
     //  • Root     → request su; on grant switch (feedback via snackbar) + close.
     //  • Shizuku  → run the readiness check; if authorized switch + close (identical to 普通模式),
     //               otherwise PROGRESSIVELY reveal the setup guide instead of failing silently.
+    //  • Dhizuku  → same as Shizuku: ready → close; not ready → reveal guide.
     // The guide is hidden by default (no always-on clutter) and appears only when a tap finds
-    // Shizuku not ready — so the three rows look and behave consistently.
+    // the service not ready — so all rows look and behave consistently.
     var shizukuGuideVisible by remember { mutableStateOf(false) }
+    var dhizukuGuideVisible by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(horizontal = PrismSpacing.Lg).padding(bottom = PrismSpacing.Xl)) {
         Text(
@@ -123,6 +128,29 @@ private fun ModeListPanel(
             enter = fadeIn() + expandVertically(),
         ) {
             ShizukuGuideInline(onCheckShizuku = onCheckShizuku, onDismiss = onDismiss)
+        }
+
+        Spacer(Modifier.height(PrismSpacing.Sm))
+
+        // Dhizuku — same pattern as Shizuku: ready → close; not ready → reveal guide.
+        GroupCard {
+            ActionRow(
+                title = stringResource(R.string.lz_mode_dhizuku),
+                summary = stringResource(R.string.lz_set_mode_dhizuku_summary),
+                leadingIcon = PrismIcons.Shield,
+                trailing = activeCheck(currentMode == PrismMode.Dhizuku),
+                onClick = {
+                    if (onCheckDhizuku()) onDismiss() else dhizukuGuideVisible = true
+                },
+            )
+        }
+
+        // Inline Dhizuku setup guide — revealed only after a tap finds Dhizuku not ready.
+        AnimatedVisibility(
+            visible = dhizukuGuideVisible,
+            enter = fadeIn() + expandVertically(),
+        ) {
+            DhizukuGuideInline(onCheckDhizuku = onCheckDhizuku, onDismiss = onDismiss)
         }
 
         Spacer(Modifier.height(PrismSpacing.Sm))
@@ -177,6 +205,47 @@ private fun ShizukuGuideInline(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.lz_set_shizuku_check_button))
+        }
+    }
+}
+
+@Composable
+private fun DhizukuGuideInline(
+    onCheckDhizuku: () -> Boolean,
+    onDismiss: () -> Unit,
+) {
+    Column(modifier = Modifier.padding(horizontal = PrismSpacing.Xs, vertical = PrismSpacing.Sm)) {
+        Text(
+            text = stringResource(R.string.lz_set_dhizuku_intro),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = PrismSpacing.Sm),
+        )
+        Text(
+            text = stringResource(R.string.lz_set_dhizuku_step1),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = stringResource(R.string.lz_set_dhizuku_step2),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = stringResource(R.string.lz_set_dhizuku_step3),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = PrismSpacing.Md),
+        )
+        // Check Dhizuku readiness. If already authorized, switches mode and closes;
+        // otherwise kicks off the permission request (handled by SettingsViewModel).
+        Button(
+            onClick = {
+                if (onCheckDhizuku()) onDismiss()
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.lz_set_dhizuku_check_button))
         }
     }
 }

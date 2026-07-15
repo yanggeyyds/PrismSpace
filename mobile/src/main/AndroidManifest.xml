@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" /> <!-- Required to start ACTION_UNINSTALL_PACKAGE since Android P -->
 
     <queries>
+        <package android:name="com.rosan.dhizuku" />
         <package android:name="com.yzddmr6.prismprobe" />
         <intent>
             <action android:name="android.intent.action.MAIN" />

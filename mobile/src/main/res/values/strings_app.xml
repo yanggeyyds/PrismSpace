@@ -24,12 +24,18 @@
     <string name="lz_app_method_shizuku_summary_not_connected">Shizuku not connected</string>
     <string name="lz_app_method_shizuku_summary_waiting">Shizuku awaiting authorization</string>
     <string name="lz_app_method_shizuku_summary_wrong_mode">Switch to Shizuku mode to use this</string>
+    <string name="lz_app_method_dhizuku_title">Dhizuku auto-install</string>
+    <string name="lz_app_method_dhizuku_summary_ready">Silently install into the dual space via Dhizuku</string>
+    <string name="lz_app_method_dhizuku_summary_not_activated">Dhizuku not activated</string>
+    <string name="lz_app_method_dhizuku_summary_waiting">Dhizuku awaiting authorization</string>
+    <string name="lz_app_method_dhizuku_summary_wrong_mode">Switch to Dhizuku mode to use this</string>
     <string name="lz_app_method_root_title">Root auto-install</string>
     <string name="lz_app_method_root_summary_ready">Silently install into the dual space via Root</string>
     <string name="lz_app_method_root_summary_not_enabled">Root mode off — enable it in Settings to auto-install</string>
     <string name="lz_app_filesync_open_install_entry">Open dual-space installer</string>
     <string name="lz_app_filesync_allow_file_manager">Allow file manager</string>
     <string name="lz_app_clone_shizuku_failed">Clone via Shizuku failed. Open Shizuku and make sure PrismSpace is authorized, then try again.</string>
+    <string name="lz_app_clone_dhizuku_failed">Clone via Dhizuku failed. Open Dhizuku and make sure PrismSpace is authorized, then try again.</string>
 
     <!-- DeleteSpaceSheets -->
     <string name="lz_app_delete_dual_space">Delete dual space</string>

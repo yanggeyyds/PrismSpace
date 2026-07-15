@@ -63,6 +63,11 @@
     <string name="lz_vm_mode_shizuku_summary_waiting">Shizuku is connected but still needs to authorize PrismSpace.</string>
     <string name="lz_vm_mode_shizuku_summary_not_running">Start Shizuku or wireless debugging to enable enhanced capabilities.</string>
     <string name="lz_vm_mode_shizuku_summary_not_installed">Shizuku was not detected; standard dual-open features still work.</string>
+    <string name="lz_vm_mode_dhizuku_title">Dhizuku mode</string>
+    <string name="lz_vm_mode_dhizuku_summary_ready">Device Owner privileges shared; enhanced cloning available.</string>
+    <string name="lz_vm_mode_dhizuku_summary_waiting">Dhizuku is activated but still needs to authorize PrismSpace.</string>
+    <string name="lz_vm_mode_dhizuku_summary_not_activated">Activate Dhizuku as Device Owner to enable enhanced capabilities.</string>
+    <string name="lz_vm_mode_dhizuku_summary_not_installed">Dhizuku was not detected; standard dual-open features still work.</string>
     <string name="lz_vm_mode_root_title">Root mode</string>
     <string name="lz_vm_mode_root_summary">Root is only used for advanced diagnostics and fallback maintenance; it is not required for standard dual-open features.</string>
 
@@ -71,6 +76,12 @@
     <string name="lz_vm_shizuku_status_not_running">Not running</string>
     <string name="lz_vm_shizuku_status_waiting">Waiting for authorization</string>
     <string name="lz_vm_shizuku_status_ready">Available</string>
+
+    <!-- PrismDhizukuStatus labels -->
+    <string name="lz_vm_dhizuku_status_not_installed">Not installed</string>
+    <string name="lz_vm_dhizuku_status_not_activated">Not activated</string>
+    <string name="lz_vm_dhizuku_status_waiting">Waiting for authorization</string>
+    <string name="lz_vm_dhizuku_status_ready">Available</string>
 
     <!-- PrismRootStatus labels -->
     <string name="lz_vm_root_status_not_detected">Not detected</string>

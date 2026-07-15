@@ -31,12 +31,18 @@
     <string name="lz_set_mode_normal_title">普通模式</string>
     <string name="lz_set_mode_normal_summary">无需额外授权，核心双开、启动、冻结、文件传输均可用</string>
     <string name="lz_set_mode_shizuku_summary">增强克隆与跨用户操作，需连接 Shizuku 服务</string>
+    <string name="lz_set_mode_dhizuku_summary">共享设备所有者权限以增强克隆，需激活并授权 Dhizuku</string>
     <string name="lz_set_mode_root_summary">高级修复与诊断，需授予 Root 权限</string>
     <string name="lz_set_shizuku_intro">Shizuku 让 PrismSpace 以 ADB 权限增强克隆与跨用户操作。</string>
     <string name="lz_set_shizuku_step1">第 1 步  安装并打开 Shizuku 应用。</string>
     <string name="lz_set_shizuku_step2">第 2 步  用「无线调试」配对，或连接电脑执行 ADB 启动 Shizuku；有 Root 时可在 Shizuku 内一键启动。</string>
     <string name="lz_set_shizuku_step3">第 3 步  回到本页，点下方按钮检查并授权连接。</string>
     <string name="lz_set_shizuku_check_button">检查 Shizuku 连接</string>
+    <string name="lz_set_dhizuku_intro">Dhizuku 把设备所有者权限共享给 PrismSpace。与 Shizuku 不同，激活一次后重启依然生效。</string>
+    <string name="lz_set_dhizuku_step1">第 1 步  安装并打开 Dhizuku 应用，按其引导激活为设备所有者。</string>
+    <string name="lz_set_dhizuku_step2">第 2 步  Dhizuku 激活后，回到本页并点下方按钮申请授权。</string>
+    <string name="lz_set_dhizuku_step3">第 3 步  在 Dhizuku 弹出的授权提示中允许，本页会自动更新。</string>
+    <string name="lz_set_dhizuku_check_button">检查 Dhizuku 授权</string>
 
     <!-- AboutSheet.kt -->
     <string name="lz_set_about_intro">面向 Android 的双开空间管理器。在系统工作资料之上提供独立运行环境，让同一应用以多个账号并行存在，彼此数据互不干扰。</string>
