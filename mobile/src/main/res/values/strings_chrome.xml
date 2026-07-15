@@ -3,6 +3,7 @@
     <!-- Run-mode labels (shared by Home + Settings) -->
     <string name="lz_mode_normal">Normal mode</string>
     <string name="lz_mode_shizuku">Shizuku/ADB</string>
+    <string name="lz_mode_dhizuku">Dhizuku</string>
     <string name="lz_mode_root">Root</string>
     <!-- Bottom navigation -->
     <string name="lz_nav_home">Home</string>

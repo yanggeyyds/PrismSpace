@@ -24,12 +24,18 @@
     <string name="lz_app_method_shizuku_summary_not_connected">Shizuku 未连接</string>
     <string name="lz_app_method_shizuku_summary_waiting">Shizuku 等待授权</string>
     <string name="lz_app_method_shizuku_summary_wrong_mode">切换到 Shizuku 模式后可用</string>
+    <string name="lz_app_method_dhizuku_title">Dhizuku 自动安装</string>
+    <string name="lz_app_method_dhizuku_summary_ready">经 Dhizuku 静默安装到双开空间</string>
+    <string name="lz_app_method_dhizuku_summary_not_activated">Dhizuku 未激活</string>
+    <string name="lz_app_method_dhizuku_summary_waiting">Dhizuku 等待授权</string>
+    <string name="lz_app_method_dhizuku_summary_wrong_mode">切换到 Dhizuku 模式后可用</string>
     <string name="lz_app_method_root_title">Root 自动安装</string>
     <string name="lz_app_method_root_summary_ready">经 Root 静默安装到双开空间</string>
     <string name="lz_app_method_root_summary_not_enabled">未启用 Root 模式（去设置启用后可自动安装）</string>
     <string name="lz_app_filesync_open_install_entry">打开双开空间安装入口</string>
     <string name="lz_app_filesync_allow_file_manager">授权系统文件管理器</string>
     <string name="lz_app_clone_shizuku_failed">Shizuku 克隆失败。请打开 Shizuku 确认已授权 PrismSpace 后重试。</string>
+    <string name="lz_app_clone_dhizuku_failed">Dhizuku 克隆失败。请打开 Dhizuku 确认已授权 PrismSpace 后重试。</string>
 
     <!-- DeleteSpaceSheets -->
     <string name="lz_app_delete_dual_space">删除双开空间</string>

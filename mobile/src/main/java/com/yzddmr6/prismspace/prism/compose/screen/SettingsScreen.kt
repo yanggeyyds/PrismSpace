@@ -232,6 +232,7 @@ fun SettingsScreen(nav: NavHostController) {
             onDismiss = { showModeSheet = false },
             onSetNormal = { vm.setNormalMode() },
             onCheckShizuku = { vm.checkShizuku() },
+            onCheckDhizuku = { vm.checkDhizuku() },
             onRequestRoot = { vm.requestRoot() },
         )
     }

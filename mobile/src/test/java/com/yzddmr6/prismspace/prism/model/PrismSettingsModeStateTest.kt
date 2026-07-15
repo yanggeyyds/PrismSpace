@@ -35,6 +35,36 @@ class PrismSettingsModeStateTest {
         )
     }
 
+    @Test fun dhizukuDistinguishesSetupStates() {
+        assertEquals(
+            "未安装",
+            PrismSettingsModeState.from(
+                PrismShizukuAdbStatus.NotInstalled, PrismRootStatus.NotDetected, PrismDhizukuStatus.NotInstalled).dhizuku.status,
+        )
+        assertEquals(
+            "未激活",
+            PrismSettingsModeState.from(
+                PrismShizukuAdbStatus.NotInstalled, PrismRootStatus.NotDetected, PrismDhizukuStatus.NotActivated).dhizuku.status,
+        )
+        assertEquals(
+            "等待授权",
+            PrismSettingsModeState.from(
+                PrismShizukuAdbStatus.NotInstalled, PrismRootStatus.NotDetected, PrismDhizukuStatus.WaitingAuthorization).dhizuku.status,
+        )
+        assertEquals(
+            "可用",
+            PrismSettingsModeState.from(
+                PrismShizukuAdbStatus.NotInstalled, PrismRootStatus.NotDetected, PrismDhizukuStatus.Ready).dhizuku.status,
+        )
+    }
+
+    @Test fun dhizukuDefaultsToNotActivatedWhenOmitted() {
+        // When the caller doesn't specify a Dhizuku status, the default is NotActivated ("未激活").
+        val state = PrismSettingsModeState.from(
+            PrismShizukuAdbStatus.NotInstalled, PrismRootStatus.NotDetected)
+        assertEquals("未激活", state.dhizuku.status)
+    }
+
     @Test fun rootModeCopySaysItIsFallbackOnly() {
         val state = PrismSettingsModeState.from(
             shizuku = PrismShizukuAdbStatus.Ready,

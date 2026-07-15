@@ -72,6 +72,8 @@ import com.yzddmr6.prismspace.prism.service.runProfileBridgeOperation
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.UserServiceArgs
 import rikka.shizuku.Shizuku.removeRequestPermissionResultListener
+import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.dhizuku.api.DhizukuUserServiceArgs
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.annotation.AnnotationRetention.SOURCE
@@ -107,6 +109,16 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 		val isShizukuAvailable = try { Shizuku.getVersion() >= 11 } catch (e: RuntimeException) { false }
 		val isShizukuReady = isShizukuAvailable && Shizuku.checkSelfPermission() == PERMISSION_GRANTED
 
+		// Dhizuku readiness mirrors the SettingsViewModel check: init must succeed and the user must have
+		// granted the Dhizuku permission. Dhizuku shares Device Owner privileges (activated once, persists
+		// across reboots), so unlike Shizuku there is no "running" state to poll — only authorized or not.
+		val isDhizukuReady = try {
+			Dhizuku.init(context.applicationContext) && Dhizuku.isPermissionGranted()
+		} catch (e: RuntimeException) { false }
+		val isDhizukuAvailable = try {
+			Dhizuku.init(context.applicationContext)
+		} catch (e: RuntimeException) { false }
+
 		val fragment = ModelBottomSheetFragment()
 		val alp = PrismAppListProvider.getInstance(context)
 		val dialog = AppClonesBottomSheet(targets, icons, { user -> alp.isInstalled(pkg, user) }) { target, mode ->
@@ -116,14 +128,15 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 			fragment.dismiss() }
 
 		// Root availability follows the chosen run mode (set in Settings, which already granted su) — we do
-		// NOT probe su here, to avoid a root prompt on every clone. Shizuku/Play use non-prompting checks.
+		// NOT probe su here, to avoid a root prompt on every clone. Shizuku/Dhizuku/Play use non-prompting checks.
 		val selectedRunMode = CapabilityRepositoryProvider.get(context).selectedMode.value
 		val isRootReady = selectedRunMode == PrismMode.Root
 		// Run mode is authoritative: Shizuku is selectable only when the user actually chose Shizuku
 		// mode (and it's connected). In 普通模式 the row stays visible but greyed with a 「去启用」 jump to
-		// run-mode settings (discovery funnel), so 普通模式 can no longer silently use Shizuku. (Root is
-		// already mode-gated via isRootReady.)
+		// run-mode settings (discovery funnel), so 普通模式 can no longer silently use Shizuku. (Root and
+		// Dhizuku are already mode-gated via isRootReady/isDhizukuModeReady.)
 		val isShizukuModeReady = selectedRunMode == PrismMode.Shizuku && isShizukuReady
+		val isDhizukuModeReady = selectedRunMode == PrismMode.Dhizuku && isDhizukuReady
 		// i18n: option labels were hardcoded Chinese (showed Chinese in an English UI). Resolve via the
 		// app's chosen locale so the install-method dialog is fully localized.
 		val loc = PrismLocale.wrap(context)
@@ -136,6 +149,12 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 				else if (! isShizukuAvailable) loc.getString(R.string.lz_app_method_shizuku_summary_not_connected)
 				else loc.getString(R.string.lz_app_method_shizuku_summary_waiting),
 				available = isShizukuModeReady, showEnableGuide = true),
+			CloneModeOption(MODE_DHIZUKU, loc.getString(R.string.lz_app_method_dhizuku_title),
+				if (isDhizukuModeReady) loc.getString(R.string.lz_app_method_dhizuku_summary_ready)
+				else if (selectedRunMode != PrismMode.Dhizuku) loc.getString(R.string.lz_app_method_dhizuku_summary_wrong_mode)
+				else if (! isDhizukuAvailable) loc.getString(R.string.lz_app_method_dhizuku_summary_not_activated)
+				else loc.getString(R.string.lz_app_method_dhizuku_summary_waiting),
+				available = isDhizukuModeReady, showEnableGuide = true),
 			CloneModeOption(MODE_ROOT, loc.getString(R.string.lz_app_method_root_title),
 				if (isRootReady) loc.getString(R.string.lz_app_method_root_summary_ready)
 				else loc.getString(R.string.lz_app_method_root_summary_not_enabled),
@@ -146,6 +165,7 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 		val defaultMode = when (selectedRunMode) {
 			PrismMode.Root -> if (isRootReady) MODE_ROOT else MODE_INSTALLER
 			PrismMode.Shizuku -> if (isShizukuReady) MODE_SHIZUKU else MODE_INSTALLER
+			PrismMode.Dhizuku -> if (isDhizukuReady) MODE_DHIZUKU else MODE_INSTALLER
 			else -> MODE_INSTALLER
 		}
 
@@ -169,6 +189,7 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 		val mode = when (CapabilityRepositoryProvider.get(context).selectedMode.value) {
 			PrismMode.Root -> MODE_ROOT
 			PrismMode.Shizuku -> MODE_SHIZUKU
+			PrismMode.Dhizuku -> MODE_DHIZUKU
 			else -> MODE_INSTALLER   // 普通模式 → 文件同步
 		}
 		makeAppAvailable(target, mode)
@@ -197,7 +218,13 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 		// still gated by "actually installed in the dual space", so a failed clone won't show a ghost row.
 		UserCloneRegistry.add(context, pkg)
 		val route = cloneRoute(target.isParentProfile(), source.isSystem, mode,
-				{ isInstallerUsable() }, { Shizuku.checkSelfPermission() == PERMISSION_GRANTED }, { mode == MODE_ROOT })
+				{ isInstallerUsable() },
+				{ Shizuku.checkSelfPermission() == PERMISSION_GRANTED },
+				{ mode == MODE_ROOT },
+				{
+					try { Dhizuku.init(context.applicationContext) && Dhizuku.isPermissionGranted() }
+					catch (e: RuntimeException) { false }
+				})
 		DiagnosticLog.i(TAG, "cloneApp route pkg=$pkg targetUser=${target.toId()} route=$route")
 			when (route) {
 				CloneRoute.PARENT_INSTALLER -> {
@@ -249,71 +276,140 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 				}
 
 				CloneRoute.SHIZUKU -> {
-					val component = ComponentName(context, PrivilegedRemoteWorker::class.java)
-					val shizukuServiceTag = "clone-$pkg-${SystemClock.uptimeMillis()}"
-					val args = UserServiceArgs(component).daemon(false).processNameSuffix(pkg).tag(shizukuServiceTag)
-					val done = java.util.concurrent.atomic.AtomicBoolean(false)
-					val main = Handler(Looper.getMainLooper())
-					fun fail() = feedback(PrismLocale.wrap(context).getString(R.string.lz_app_clone_shizuku_failed), isError = true)
-					lateinit var conn: ServiceConnection
-					conn = object : ServiceConnection {
-						override fun onServiceConnected(name: ComponentName, service: IBinder) {
-							DiagnosticLog.i(TAG, "Shizuku service connected pkg=$pkg targetUser=${target.toId()} name=$name")
-							if (!done.compareAndSet(false, true)) return
-							main.removeCallbacksAndMessages(null)
-							vm.viewModelScope.launch {
-								val result = withContext(Dispatchers.IO) {
-									val data = Parcel.obtain().apply { writeString(pkg); writeInt(target.toId()) }
-									val reply = Parcel.obtain()
-									try {
-										service.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0)
-										reply.readInt()
-									} catch (e: RemoteException) {
-										DiagnosticLog.e(TAG, "Shizuku transact failed for $pkg", e)
-										-1
-									} finally {
-										data.recycle()
-										reply.recycle()
-										runCatching { Shizuku.unbindUserService(args, conn, true) }
-									}
-								}
-								DiagnosticLog.i(TAG, "Shizuku clone result pkg=$pkg targetUser=${target.toId()} result=$result")
-								if (result == 1) {
-									PrismAppListProvider.getInstance(context).refreshPackage(pkg, target, true)
-									feedback(PrismLocale.wrap(context).getString(R.string.toast_successfully_cloned, source.label))
-								} else {
-									fail()
+				val component = ComponentName(context, PrivilegedRemoteWorker::class.java)
+				val shizukuServiceTag = "clone-$pkg-${SystemClock.uptimeMillis()}"
+				val args = UserServiceArgs(component).daemon(false).processNameSuffix(pkg).tag(shizukuServiceTag)
+				val done = java.util.concurrent.atomic.AtomicBoolean(false)
+				val main = Handler(Looper.getMainLooper())
+				fun fail() = feedback(PrismLocale.wrap(context).getString(R.string.lz_app_clone_shizuku_failed), isError = true)
+				lateinit var conn: ServiceConnection
+				conn = object : ServiceConnection {
+					override fun onServiceConnected(name: ComponentName, service: IBinder) {
+						DiagnosticLog.i(TAG, "Shizuku service connected pkg=$pkg targetUser=${target.toId()} name=$name")
+						if (!done.compareAndSet(false, true)) return
+						main.removeCallbacksAndMessages(null)
+						vm.viewModelScope.launch {
+							val result = withContext(Dispatchers.IO) {
+								val data = Parcel.obtain().apply { writeString(pkg); writeInt(target.toId()) }
+								val reply = Parcel.obtain()
+								try {
+									service.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0)
+									reply.readInt()
+								} catch (e: RemoteException) {
+									DiagnosticLog.e(TAG, "Shizuku transact failed for $pkg", e)
+									-1
+								} finally {
+									data.recycle()
+									reply.recycle()
+									runCatching { Shizuku.unbindUserService(args, conn, true) }
 								}
 							}
-						}
-
-						override fun onServiceDisconnected(name: ComponentName?) {
-							DiagnosticLog.i(TAG, "Shizuku service disconnected before completion pkg=$pkg targetUser=${target.toId()} name=$name")
-							if (done.compareAndSet(false, true)) {
-								main.removeCallbacksAndMessages(null)
+							DiagnosticLog.i(TAG, "Shizuku clone result pkg=$pkg targetUser=${target.toId()} result=$result")
+							if (result == 1) {
+								PrismAppListProvider.getInstance(context).refreshPackage(pkg, target, true)
+								feedback(PrismLocale.wrap(context).getString(R.string.toast_successfully_cloned, source.label))
+							} else {
 								fail()
 							}
 						}
 					}
-					main.postDelayed({
-						if (done.compareAndSet(false, true)) {
-							runCatching { Shizuku.unbindUserService(args, conn, true) }
-							fail()
-						}
-					}, 20_000)
-					try {
-						DiagnosticLog.i(TAG, "Binding Shizuku service pkg=$pkg targetUser=${target.toId()}")
-						Shizuku.bindUserService(args, conn)
-					} catch (e: Throwable) {
-						DiagnosticLog.e(TAG, "Shizuku bindUserService failed for $pkg", e)
+
+					override fun onServiceDisconnected(name: ComponentName?) {
+						DiagnosticLog.i(TAG, "Shizuku service disconnected before completion pkg=$pkg targetUser=${target.toId()} name=$name")
 						if (done.compareAndSet(false, true)) {
 							main.removeCallbacksAndMessages(null)
 							fail()
 						}
 					}
-					return
 				}
+				main.postDelayed({
+					if (done.compareAndSet(false, true)) {
+						runCatching { Shizuku.unbindUserService(args, conn, true) }
+						fail()
+					}
+				}, 20_000)
+				try {
+					DiagnosticLog.i(TAG, "Binding Shizuku service pkg=$pkg targetUser=${target.toId()}")
+					Shizuku.bindUserService(args, conn)
+				} catch (e: Throwable) {
+					DiagnosticLog.e(TAG, "Shizuku bindUserService failed for $pkg", e)
+					if (done.compareAndSet(false, true)) {
+						main.removeCallbacksAndMessages(null)
+						fail()
+					}
+				}
+				return
 			}
+
+			// Dhizuku mirrors the Shizuku privileged worker path: bind PrivilegedRemoteWorker into the
+			// Dhizuku server process (Device Owner privileges), transact the clone, then unbind with
+			// remove=true so the privileged process exits. DhizukuUserServiceArgs only carries the
+			// ComponentName (no daemon/tag/processNameSuffix like Shizuku's UserServiceArgs).
+			CloneRoute.DHIZUKU -> {
+				val component = ComponentName(context, PrivilegedRemoteWorker::class.java)
+				val args = DhizukuUserServiceArgs(component)
+				val done = java.util.concurrent.atomic.AtomicBoolean(false)
+				val main = Handler(Looper.getMainLooper())
+				fun fail() = feedback(PrismLocale.wrap(context).getString(R.string.lz_app_clone_dhizuku_failed), isError = true)
+				lateinit var conn: ServiceConnection
+				conn = object : ServiceConnection {
+					override fun onServiceConnected(name: ComponentName, service: IBinder) {
+						DiagnosticLog.i(TAG, "Dhizuku service connected pkg=$pkg targetUser=${target.toId()} name=$name")
+						if (!done.compareAndSet(false, true)) return
+						main.removeCallbacksAndMessages(null)
+						vm.viewModelScope.launch {
+							val result = withContext(Dispatchers.IO) {
+								val data = Parcel.obtain().apply { writeString(pkg); writeInt(target.toId()) }
+								val reply = Parcel.obtain()
+								try {
+									service.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0)
+									reply.readInt()
+								} catch (e: RemoteException) {
+									DiagnosticLog.e(TAG, "Dhizuku transact failed for $pkg", e)
+									-1
+								} finally {
+									data.recycle()
+									reply.recycle()
+									runCatching { Dhizuku.unbindUserService(args, conn, true) }
+								}
+							}
+							DiagnosticLog.i(TAG, "Dhizuku clone result pkg=$pkg targetUser=${target.toId()} result=$result")
+							if (result == 1) {
+								PrismAppListProvider.getInstance(context).refreshPackage(pkg, target, true)
+								feedback(PrismLocale.wrap(context).getString(R.string.toast_successfully_cloned, source.label))
+							} else {
+								fail()
+							}
+						}
+					}
+
+					override fun onServiceDisconnected(name: ComponentName?) {
+						DiagnosticLog.i(TAG, "Dhizuku service disconnected before completion pkg=$pkg targetUser=${target.toId()} name=$name")
+						if (done.compareAndSet(false, true)) {
+							main.removeCallbacksAndMessages(null)
+							fail()
+						}
+					}
+				}
+				main.postDelayed({
+					if (done.compareAndSet(false, true)) {
+						runCatching { Dhizuku.unbindUserService(args, conn, true) }
+						fail()
+					}
+				}, 20_000)
+				try {
+					DiagnosticLog.i(TAG, "Binding Dhizuku service pkg=$pkg targetUser=${target.toId()}")
+					Dhizuku.bindUserService(args, conn)
+				} catch (e: Throwable) {
+					DiagnosticLog.e(TAG, "Dhizuku bindUserService failed for $pkg", e)
+					if (done.compareAndSet(false, true)) {
+						main.removeCallbacksAndMessages(null)
+						fail()
+					}
+				}
+				return
+			}
+		}
 	}
 
 
@@ -413,10 +509,11 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 
 	companion object {
 
-		@IntDef(MODE_INSTALLER, MODE_SHIZUKU, MODE_ROOT) @Target(TYPE) @Retention(SOURCE)
+		@IntDef(MODE_INSTALLER, MODE_SHIZUKU, MODE_DHIZUKU, MODE_ROOT) @Target(TYPE) @Retention(SOURCE)
 		annotation class AppCloneMode
 		const val MODE_INSTALLER = 0    // 普通模式: copy full app + guide to profile-side system installer
 		const val MODE_SHIZUKU = 2
+		const val MODE_DHIZUKU = 4
 		const val MODE_ROOT = 3
 
 

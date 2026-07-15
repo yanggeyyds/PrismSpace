@@ -63,6 +63,11 @@
     <string name="lz_vm_mode_shizuku_summary_waiting">Shizuku 已连接，仍需要授权 PrismSpace。</string>
     <string name="lz_vm_mode_shizuku_summary_not_running">启动 Shizuku 或无线调试后可启用增强能力。</string>
     <string name="lz_vm_mode_shizuku_summary_not_installed">未检测到 Shizuku；普通双开功能仍可使用。</string>
+    <string name="lz_vm_mode_dhizuku_title">Dhizuku 模式</string>
+    <string name="lz_vm_mode_dhizuku_summary_ready">已共享设备所有者权限，可使用增强克隆。</string>
+    <string name="lz_vm_mode_dhizuku_summary_waiting">Dhizuku 已激活，仍需要授权 PrismSpace。</string>
+    <string name="lz_vm_mode_dhizuku_summary_not_activated">将 Dhizuku 激活为设备所有者后可启用增强能力。</string>
+    <string name="lz_vm_mode_dhizuku_summary_not_installed">未检测到 Dhizuku；普通双开功能仍可使用。</string>
     <string name="lz_vm_mode_root_title">Root 模式</string>
     <string name="lz_vm_mode_root_summary">Root 仅用于高级诊断和兜底维护，不是普通双开功能的依赖。</string>
 
@@ -71,6 +76,12 @@
     <string name="lz_vm_shizuku_status_not_running">未运行</string>
     <string name="lz_vm_shizuku_status_waiting">等待授权</string>
     <string name="lz_vm_shizuku_status_ready">可用</string>
+
+    <!-- PrismDhizukuStatus labels -->
+    <string name="lz_vm_dhizuku_status_not_installed">未安装</string>
+    <string name="lz_vm_dhizuku_status_not_activated">未激活</string>
+    <string name="lz_vm_dhizuku_status_waiting">等待授权</string>
+    <string name="lz_vm_dhizuku_status_ready">可用</string>
 
     <!-- PrismRootStatus labels -->
     <string name="lz_vm_root_status_not_detected">未检测</string>

@@ -26,6 +26,7 @@ import com.yzddmr6.prismspace.prism.model.CapabilityState
 import com.yzddmr6.prismspace.prism.model.PrismRootStatus
 import com.yzddmr6.prismspace.prism.model.PrismSettingsModeState
 import com.yzddmr6.prismspace.prism.model.PrismShizukuAdbStatus
+import com.yzddmr6.prismspace.prism.model.PrismDhizukuStatus
 import com.yzddmr6.prismspace.prism.model.SettingsActionPlanner
 import com.yzddmr6.prismspace.prism.service.CapabilityService
 import com.yzddmr6.prismspace.prism.service.ProfileEntryLauncher
@@ -45,6 +46,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
+import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.dhizuku.api.DhizukuRequestPermissionListener
 
 // ---------------------------------------------------------------------------
 // Pure UI model — Android-free, fully unit-testable
@@ -67,6 +70,7 @@ data class SettingsUiModel(
     val profileOwnerReady: Boolean,
     val normalMode: SettingsModeRow,
     val shizukuAdbMode: SettingsModeRow,
+    val dhizukuMode: SettingsModeRow,
     val rootMode: SettingsModeRow,
     // Feedback message shown below the screen (e.g. snapshot result)
     val feedbackMessage: String? = null,
@@ -119,26 +123,30 @@ internal fun mapSettingsUiModel(
     profileOwner: Boolean,
     shizukuAuthorized: Boolean,
     shizukuAvailable: Boolean,
+    dhizukuAuthorized: Boolean = false,
+    dhizukuAvailable: Boolean = false,
     modeState: PrismSettingsModeState,
     capabilityState: CapabilityState,
     selectedMode: PrismMode = PrismMode.Normal,
     res: StringResolver = zhFallback,
 ): SettingsUiModel {
-    // Mode card body depends on profile-owner and Shizuku authorization state.
+    // Mode card body depends on profile-owner and authorization state.
     val modeBody = when {
         !profileOwner -> res(R.string.lz_setvm_mode_body_not_created, emptyArray())
         shizukuAuthorized -> res(R.string.lz_setvm_mode_body_shizuku, emptyArray())
+        dhizukuAuthorized -> res(R.string.lz_setvm_mode_body_dhizuku, emptyArray())
         else -> res(R.string.lz_setvm_mode_body_normal, emptyArray())
     }
     val level = when {
         !profileOwner -> PrismLevel.Error
-        shizukuAuthorized -> PrismLevel.Ok
+        shizukuAuthorized || dhizukuAuthorized -> PrismLevel.Ok
         else -> PrismLevel.Ok
     }
 
     // isActive follows the USER's selectedMode choice (single source of truth).
     // Capability availability is still used for gating, but not for the checkmark.
     val shizukuCapable = capabilityState.shizuku is CapabilityAvailability.Available
+    val dhizukuCapable = capabilityState.dhizuku is CapabilityAvailability.Available
     val rootCapable = capabilityState.root is CapabilityAvailability.Available
 
     return SettingsUiModel(
@@ -157,6 +165,12 @@ internal fun mapSettingsUiModel(
             summary = modeState.shizukuAdb.summary,
             statusLabel = modeState.shizukuAdb.status,
             isActive = selectedMode == PrismMode.Shizuku && shizukuCapable,
+        ),
+        dhizukuMode = SettingsModeRow(
+            title = modeState.dhizuku.title,
+            summary = modeState.dhizuku.summary,
+            statusLabel = modeState.dhizuku.status,
+            isActive = selectedMode == PrismMode.Dhizuku && dhizukuCapable,
         ),
         rootMode = SettingsModeRow(
             title = modeState.root.title,
@@ -184,6 +198,7 @@ internal fun mapSettingsUiModel(
 // ---------------------------------------------------------------------------
 
 private const val SHIZUKU_PACKAGE = "moe.shizuku.privileged.api"
+private const val DHIZUKU_PACKAGE = "com.rosan.dhizuku"
 private const val SHIZUKU_PERMISSION_REQUEST = 1601
 private const val PRISM_PROBE_PACKAGE = "com.yzddmr6.prismprobe"
 private const val BYTES_PER_MB = 1024L * 1024L
@@ -303,6 +318,55 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             setFeedback(str(R.string.lz_setvm_shizuku_not_ready), isError = true)
         }
         return authorized
+    }
+
+    // ---------------------------------------------------------------------------
+    // Dhizuku action handling.
+    // Dhizuku shares Device Owner privileges. Unlike Shizuku (ADB-based), Dhizuku
+    // is activated once as Device Owner and persists across reboots. Permission is
+    // requested via a callback listener (not an activity result like Shizuku).
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Checks Dhizuku readiness. If already authorized, switches to Dhizuku mode.
+     * If available but not yet authorized, requests permission asynchronously and
+     * switches on grant. Returns true only if already authorized at call time.
+     */
+    fun checkDhizuku(): Boolean {
+        val context: Context = getApplication()
+        val available = isDhizukuAvailable(context)
+        val authorized = isDhizukuAuthorized(context)
+        if (authorized) {
+            capRepo.setSelectedMode(PrismMode.Dhizuku)
+            setFeedback(str(R.string.lz_setvm_dhizuku_connected), isError = false)
+            refreshCapabilities()
+            return true
+        }
+        if (available) {
+            setFeedback(str(R.string.lz_setvm_dhizuku_requesting), isError = false)
+            requestDhizukuPermission()
+        } else {
+            setFeedback(str(R.string.lz_setvm_dhizuku_not_ready), isError = true)
+        }
+        return false
+    }
+
+    private fun requestDhizukuPermission() {
+        try {
+            Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+                override fun onRequestPermission(grantResult: Int) {
+                    if (grantResult == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        capRepo.setSelectedMode(PrismMode.Dhizuku)
+                        setFeedback(str(R.string.lz_setvm_dhizuku_connected), isError = false)
+                    } else {
+                        setFeedback(str(R.string.lz_setvm_dhizuku_denied), isError = true)
+                    }
+                    refreshCapabilities()
+                }
+            })
+        } catch (e: RuntimeException) {
+            setFeedback(str(R.string.lz_setvm_dhizuku_permission_failed, e.message ?: e.javaClass.simpleName), isError = true)
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -597,11 +661,14 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             .onFailure { DiagnosticLog.w(TAG, "refresh users before settings state failed", it) }
         val shizukuAvailable = isShizukuAvailable()
         val shizukuAuthorized = isShizukuAuthorized(shizukuAvailable)
+        val dhizukuAvailable = isDhizukuAvailable(context)
+        val dhizukuAuthorized = isDhizukuAuthorized(context)
         val profileOwner = Users.profile?.let { Users.isProfileManagedByPrism(context, it) } == true
         DiagnosticLog.d(
             TAG,
             "settings state profile=${Users.profile?.toId() ?: Users.NULL_ID} " +
-                "profileOwner=$profileOwner shizukuAvailable=$shizukuAvailable shizukuAuthorized=$shizukuAuthorized",
+                "profileOwner=$profileOwner shizukuAvailable=$shizukuAvailable shizukuAuthorized=$shizukuAuthorized " +
+                "dhizukuAvailable=$dhizukuAvailable dhizukuAuthorized=$dhizukuAuthorized",
         )
 
         val modeState = PrismSettingsModeState.from(
@@ -609,6 +676,11 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
                 shizukuAuthorized -> PrismShizukuAdbStatus.Ready
                 shizukuAvailable -> PrismShizukuAdbStatus.WaitingAuthorization
                 else -> PrismShizukuAdbStatus.NotRunning
+            },
+            dhizuku = when {
+                dhizukuAuthorized -> PrismDhizukuStatus.Ready
+                dhizukuAvailable -> PrismDhizukuStatus.WaitingAuthorization
+                else -> PrismDhizukuStatus.NotActivated
             },
             root = PrismRootStatus.NotDetected,
             res = prismResolver(context),
@@ -620,6 +692,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             profileOwner = profileOwner,
             shizukuAvailable = shizukuAvailable,
             shizukuReady = shizukuAuthorized,
+            dhizukuAvailable = dhizukuAvailable,
+            dhizukuReady = dhizukuAuthorized,
             adbReady = false,
             rootDetected = false,
             rootEnabled = false,
@@ -631,6 +705,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             profileOwner = profileOwner,
             shizukuAuthorized = shizukuAuthorized,
             shizukuAvailable = shizukuAvailable,
+            dhizukuAuthorized = dhizukuAuthorized,
+            dhizukuAvailable = dhizukuAvailable,
             modeState = modeState,
             capabilityState = capabilityState,
             selectedMode = capRepo.selectedMode.value,
@@ -738,6 +814,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
                 profileOwnerReady = false,
                 normalMode = SettingsModeRow("", "", "", false),
                 shizukuAdbMode = SettingsModeRow("", "", "", false),
+                dhizukuMode = SettingsModeRow("", "", "", false),
                 rootMode = SettingsModeRow("", "", "", false),
                 feedbackMessage = message,
                 feedbackIsError = isError,
@@ -751,6 +828,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun isShizukuAuthorized(available: Boolean = isShizukuAvailable()): Boolean =
         ShizukuUtil.isAuthorized()
+
+    private fun isDhizukuAvailable(context: Context): Boolean = DhizukuUtil.isAvailable(context)
+
+    private fun isDhizukuAuthorized(context: Context): Boolean = DhizukuUtil.isAuthorized(context)
 }
 
 private const val TAG = "Prism.SettingsVM"

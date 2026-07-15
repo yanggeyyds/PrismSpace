@@ -2,6 +2,7 @@
 <resources>
     <string name="lz_mode_normal">普通模式</string>
     <string name="lz_mode_shizuku">Shizuku/ADB</string>
+    <string name="lz_mode_dhizuku">Dhizuku</string>
     <string name="lz_mode_root">Root</string>
     <string name="lz_nav_home">首页</string>
     <string name="lz_nav_space">空间</string>

@@ -12,6 +12,7 @@ sealed class CapabilityAvailability {
 data class CapabilityState(
     val normal: CapabilityAvailability,
     val shizuku: CapabilityAvailability,
+    val dhizuku: CapabilityAvailability = CapabilityAvailability.NeedsSetup("Dhizuku 未激活"),
     val adb: CapabilityAvailability = CapabilityAvailability.NeedsSetup("ADB 未授权"),
     val root: CapabilityAvailability,
     val profileOwner: CapabilityAvailability,
@@ -22,9 +23,11 @@ data class CapabilityState(
     val shouldPreferRoot: Boolean get() = !canUseNormal && root is CapabilityAvailability.Available
     val canUseShizukuOrAdb: Boolean get() = shizuku is CapabilityAvailability.Available
             || adb is CapabilityAvailability.Available
+    val canUseDhizuku: Boolean get() = dhizuku is CapabilityAvailability.Available
     val primaryModeLabel: String get() = when {
         normal is CapabilityAvailability.Available -> "普通模式可用"
         shizuku is CapabilityAvailability.Available -> "Shizuku 模式可用"
+        dhizuku is CapabilityAvailability.Available -> "Dhizuku 模式可用"
         adb is CapabilityAvailability.Available -> "ADB 模式可用"
         root is CapabilityAvailability.Available -> "Root 模式可用"
         else -> "需要配置"

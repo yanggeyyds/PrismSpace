@@ -31,12 +31,18 @@
     <string name="lz_set_mode_normal_title">Normal mode</string>
     <string name="lz_set_mode_normal_summary">No extra authorization needed; core cloning, launch, freeze and file transfer all work</string>
     <string name="lz_set_mode_shizuku_summary">Enhances cloning and cross-user operations; requires a Shizuku service connection</string>
+    <string name="lz_set_mode_dhizuku_summary">Shares Device Owner privileges to enhance cloning; requires Dhizuku to be activated and authorized</string>
     <string name="lz_set_mode_root_summary">Advanced repair and diagnostics; requires Root permission</string>
     <string name="lz_set_shizuku_intro">Shizuku lets PrismSpace use ADB privileges to enhance cloning and cross-user operations.</string>
     <string name="lz_set_shizuku_step1">Step 1  Install and open the Shizuku app.</string>
     <string name="lz_set_shizuku_step2">Step 2  Pair via Wireless debugging, or connect a computer and run ADB to start Shizuku; if you have Root you can start it from within Shizuku with one tap.</string>
     <string name="lz_set_shizuku_step3">Step 3  Return to this page and tap the button below to check and authorize the connection.</string>
     <string name="lz_set_shizuku_check_button">Check Shizuku connection</string>
+    <string name="lz_set_dhizuku_intro">Dhizuku shares Device Owner privileges with PrismSpace. Unlike Shizuku, it is activated once and keeps working across reboots.</string>
+    <string name="lz_set_dhizuku_step1">Step 1  Install and open the Dhizuku app, then activate it as Device Owner following its in-app guide.</string>
+    <string name="lz_set_dhizuku_step2">Step 2  Once Dhizuku is activated, return here and tap the button below to request authorization.</string>
+    <string name="lz_set_dhizuku_step3">Step 3  Approve the permission prompt shown by Dhizuku; this screen updates automatically.</string>
+    <string name="lz_set_dhizuku_check_button">Check Dhizuku authorization</string>
 
     <!-- AboutSheet.kt -->
     <string name="lz_set_about_intro">A dual-space manager for Android. Built on top of the system work profile, it provides isolated runtime environments so the same app can run with multiple accounts in parallel, with data fully separated.</string>

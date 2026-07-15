@@ -4,12 +4,18 @@
     <string name="lz_setvm_mode_title">Current mode</string>
     <string name="lz_setvm_mode_body_not_created">Dual space not created. Please finish initial setup first.</string>
     <string name="lz_setvm_mode_body_shizuku">Shizuku mode active. Enhanced capabilities enabled.</string>
+    <string name="lz_setvm_mode_body_dhizuku">Dhizuku mode active. Device Owner privileges enabled.</string>
     <string name="lz_setvm_mode_body_normal">Normal mode. Core dual-app features available.</string>
 
     <!-- SettingsViewModel: mode switching feedback -->
     <string name="lz_setvm_switched_normal">Switched to Normal mode</string>
     <string name="lz_setvm_shizuku_connected">Shizuku connected · switched to Shizuku mode</string>
     <string name="lz_setvm_shizuku_not_ready">Shizuku is not ready. Please start the Shizuku service and grant authorization first.</string>
+    <string name="lz_setvm_dhizuku_connected">Dhizuku authorized · switched to Dhizuku mode</string>
+    <string name="lz_setvm_dhizuku_requesting">Requesting Dhizuku authorization…</string>
+    <string name="lz_setvm_dhizuku_not_ready">Dhizuku is not activated. Please install and activate Dhizuku first.</string>
+    <string name="lz_setvm_dhizuku_denied">Dhizuku authorization denied. Mode unchanged.</string>
+    <string name="lz_setvm_dhizuku_permission_failed">Dhizuku authorization request failed: %1$s</string>
     <string name="lz_setvm_root_requesting">Requesting Root authorization from the system…</string>
     <string name="lz_setvm_root_granted">Root authorization granted · switched to Root mode</string>
     <string name="lz_setvm_root_denied">Root authorization not granted. Mode unchanged.</string>
