@@ -90,7 +90,12 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${{ steps.version.outputs.version }}"
-          APK_IN="assembly/build/outputs/apk/completeNormal/release/assembly-complete-normal-release.apk"
+          APK_IN=$(find assembly/build/outputs/apk -name "*.apk" -type f | head -1)
+          if [ -z "$APK_IN" ]; then
+            echo "No APK found in assembly/build/outputs/apk/"
+            exit 1
+          fi
+          echo "Found APK: $APK_IN"
           APK_OUT="PrismSpace-v${VERSION}.apk"
           SHA_OUT="${APK_OUT}.sha256"
           cp "$APK_IN" "$APK_OUT"
