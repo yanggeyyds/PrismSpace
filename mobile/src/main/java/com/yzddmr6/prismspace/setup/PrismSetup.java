@@ -97,12 +97,13 @@ public class PrismSetup {
 	}
 
 	/**
-	 * Dhizuku-path setup: creates a managed profile through the Dhizuku privileged worker
-	 * (which runs in the Dhizuku server process with Device Owner privileges).
+	 * Dhizuku-path setup: creates a managed profile through the Dhizuku privileged worker.
 	 *
-	 * The worker executes the same shell commands as the root path
-	 * ({@code pm create-user --profileOf ... --managed} + {@code dpm set-profile-owner}),
-	 * but with Dhizuku's device-owner shell privileges instead of su.
+	 * Unlike the root path (which uses {@code pm}/{@code dpm} shell commands), the Dhizuku worker
+	 * runs in the Dhizuku server process at application UID (Device Owner), NOT shell UID — so
+	 * {@code pm create-user} would fail with permission denied. Instead, the worker uses
+	 * {@link DevicePolicyManager#createAndManageUser} (a hidden API that authorizes based on
+	 * Device Owner identity via IPC to system_server, not shell UID).
 	 */
 	public static void requestProfileOwnerSetupWithDhizuku(final Activity activity) {
 		if (hasAnyExistingProfile(activity)) {
@@ -112,122 +113,90 @@ public class PrismSetup {
 		final ProgressDialog progress = ProgressDialog.show(activity, null,
 				activity.getString(R.string.setup_root_profile_progress), true);
 
-		final int parentUserId = Users.toId(Process.myUserHandle());
 		final String flatAdminComponent = DeviceAdmins.getComponentName(activity).flattenToString();
+		final int parentUserId = Users.toId(Process.myUserHandle());
+		final String enginePkg = Modules.MODULE_ENGINE;
 
-		// Single command chain: create managed profile → install engine → set profile owner → start user
-		final String createCmd = "pm create-user --profileOf " + parentUserId + " --managed PrismSpace";
-		final ApplicationInfo info;
-		try {
-			info = activity.getPackageManager().getApplicationInfo(Modules.MODULE_ENGINE, 0);
-		} catch (final NameNotFoundException e) {
-			dismissProgressAndShowError(activity, progress, 2);
-			return;
-		}
-
-		SafeAsyncTask.execute(activity, context -> {
-			// Execute via Dhizuku privileged worker (Device Owner shell)
-			return execViaDhizuku(context, createCmd);
-		}, (context, createResult) -> {
-			if (createResult == null || createResult.isEmpty()) {
-				Analytics.$().event("setup_prism_dhizuku_failed").withRaw("phase", "1").send();
-				dismissProgressAndShowError(context, progress, 1);
-				return;
-			}
-			// Parse the new user ID from "Success: created and set user N"
-			final int newUserId = parseCreatedUserId(createResult);
-			if (newUserId < 0) {
+		SafeAsyncTask.execute(activity, context ->
+				execDhizukuSetup(context, flatAdminComponent, parentUserId, enginePkg),
+				(context, result) -> {
+			if (result == null || result < 0) {
 				Analytics.$().event("setup_prism_dhizuku_failed").withRaw("phase", "1")
-						.withRaw("output", createResult).send();
+						.withRaw("result", String.valueOf(result)).send();
 				dismissProgressAndShowError(context, progress, 1);
 				return;
 			}
-
-			// Install engine APK into the new profile
-			final String installCmd = "pm install -r --user " + newUserId + " " + info.sourceDir;
-			final String setOwnerCmd = "dpm set-profile-owner --user " + newUserId + " " + flatAdminComponent;
-			final String startUserCmd = "am start-user " + newUserId;
-
-			SafeAsyncTask.execute(context, ctx -> execViaDhizuku(ctx, installCmd + " && " + setOwnerCmd + " && " + startUserCmd),
-					(ctx, result2) -> {
-						final LauncherApps launcher_apps = requireNonNull(
-								(LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE));
-						if (launcher_apps.getActivityList(ctx.getPackageName(),
-								UserHandles.of(newUserId)).isEmpty()) {
-							Analytics.$().event("setup_prism_dhizuku_failed").withRaw("phase", "2")
-									.withRaw("output", result2 == null ? "<null>" : result2).send();
-							dismissProgressAndShowError(ctx, progress, 2);
-							return;
-						}
-						if (progress.isShowing()) progress.dismiss();
-						Analytics.$().event("setup_prism_dhizuku_done").send();
-						ctx.finish();
-					});
+			final int newUserId = result;
+			// Verify the engine was actually installed in the new profile.
+			final LauncherApps launcher_apps = requireNonNull(
+					(LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE));
+			if (launcher_apps.getActivityList(context.getPackageName(),
+					UserHandles.of(newUserId)).isEmpty()) {
+				Analytics.$().event("setup_prism_dhizuku_failed").withRaw("phase", "2").send();
+				dismissProgressAndShowError(context, progress, 2);
+				return;
+			}
+			if (progress.isShowing()) progress.dismiss();
+			Analytics.$().event("setup_prism_dhizuku_done").send();
+			context.finish();
 		});
 	}
 
-	/** Execute a shell command through the Dhizuku privileged worker service. */
-	private static @Nullable String execViaDhizuku(final Context context, final String command) {
+	/**
+	 * Binds the PrivilegedRemoteWorker in the Dhizuku server process and transacts
+	 * {@code TRANSACTION_SETUP_PROFILE}, which creates the managed profile, installs the engine,
+	 * sets the profile owner, and starts the user — all via DevicePolicyManager hidden APIs.
+	 *
+	 * @return the new user id (≥0) on success, or -1 on failure.
+	 */
+	private static Integer execDhizukuSetup(final Context context, final String adminFlat,
+			final int parentUserId, final String enginePkg) {
 		try {
 			final Class<?> dhizukuClass = Class.forName("com.rosan.dhizuku.api.Dhizuku");
 			final Class<?> argsClass = Class.forName("com.rosan.dhizuku.api.DhizukuUserServiceArgs");
 			final java.lang.reflect.Method init = dhizukuClass.getMethod("init", Context.class);
-			if (!(boolean) init.invoke(null, context.getApplicationContext())) return null;
+			if (!(boolean) init.invoke(null, context.getApplicationContext())) return -1;
 
 			final ComponentName component = new ComponentName(context, com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.class);
 			final Object args = argsClass.getConstructor(ComponentName.class).newInstance(component);
 
-			final java.util.concurrent.atomic.AtomicReference<String> output = new java.util.concurrent.atomic.AtomicReference<>(null);
+			final java.util.concurrent.atomic.AtomicReference<Integer> output = new java.util.concurrent.atomic.AtomicReference<>(-1);
 			final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
 			final android.content.ServiceConnection conn = new android.content.ServiceConnection() {
 				@Override public void onServiceConnected(ComponentName name, final android.os.IBinder service) {
-					// onServiceConnected is delivered on the main thread; the transact below is a
-					// synchronous IPC that can block for seconds (pm install). Run it on a worker
-					// thread to avoid ANR, mirroring the Shizuku clone path (withContext(Dispatchers.IO)).
+					// onServiceConnected is delivered on the main thread; the transact is a synchronous
+					// IPC that can block while system_server creates the user and installs the package.
+					// Run on a worker thread to avoid ANR.
 					new Thread(() -> {
 						try {
 							final android.os.Parcel data = android.os.Parcel.obtain();
 							final android.os.Parcel reply = android.os.Parcel.obtain();
-							data.writeString(command);
-							service.transact(com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.TRANSACTION_EXEC_SHELL, data, reply, 0);
-							output.set(reply.readString());
+							data.writeString(adminFlat);
+							data.writeInt(parentUserId);
+							data.writeString(enginePkg);
+							service.transact(com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.TRANSACTION_SETUP_PROFILE, data, reply, 0);
+							output.set(reply.readInt());
 						} catch (Exception e) {
-						com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku exec failed", e);
-					} finally {
+							com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku setup transact failed", e);
+						} finally {
 							latch.countDown();
 							try { dhizukuClass.getMethod("unbindUserService", android.content.ServiceConnection.class).invoke(null, this); }
 							catch (Exception ignored) {}
 						}
-					}, "DhizukuExec").start();
+					}, "DhizukuSetup").start();
 				}
 				@Override public void onServiceDisconnected(ComponentName name) { latch.countDown(); }
 			};
 
 			dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class)
 					.invoke(null, args, conn);
-			latch.await(60, java.util.concurrent.TimeUnit.SECONDS);
+			latch.await(120, java.util.concurrent.TimeUnit.SECONDS);
 			return output.get();
 		} catch (Exception e) {
-			com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku exec setup failed", e);
-			return null;
+			com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku setup bind failed", e);
+			return -1;
 		}
-	}
-
-
-	private static int parseCreatedUserId(final String output) {
-		if (output == null) return -1;
-		// Typical output: "Success: created and set user 10"
-		final java.util.regex.Matcher m = java.util.regex.Pattern.compile("user\\s+(\\d+)").matcher(output);
-		if (m.find()) try { return Integer.parseInt(m.group(1)); } catch (NumberFormatException ignored) {}
-		// Fallback: try the last number in the output (user IDs are always > 0)
-		final String[] tokens = output.split("\\D+");
-		for (int i = tokens.length - 1; i >= 0; i--) {
-			if (!tokens[i].isEmpty()) {
-				try { return Integer.parseInt(tokens[i]); } catch (NumberFormatException ignored) {}
-			}
-		}
-		return -1;
 	}
 
 	/** Return true if user 0 already has any profile other than itself. */

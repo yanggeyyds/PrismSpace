@@ -1,6 +1,8 @@
 package com.yzddmr6.prismspace.controller
 
 import android.app.AppOpsManager
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.INSTALL_REASON_USER
@@ -10,6 +12,9 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.Q
 import android.os.IBinder
 import android.os.Parcel
+import android.os.PersistableBundle
+import android.os.UserHandle
+import android.os.UserManager
 import com.yzddmr6.prismspace.analytics.DiagnosticLog
 import com.yzddmr6.prismspace.util.UserHandles
 import com.yzddmr6.prismspace.appops.AppOpsCompat
@@ -106,6 +111,20 @@ class PrivilegedRemoteWorker: Binder() {
                 reply?.writeInt(-1) }
             return true
         }
+        if (code == TRANSACTION_SETUP_PROFILE) {
+            val adminFlat = data.readString()!!
+            val parentUserId = data.readInt()
+            val enginePkg = data.readString()!!
+            DiagnosticLog.i(TAG, "setupManagedProfile admin=$adminFlat parent=$parentUserId engine=$enginePkg")
+            try {
+                val result = setupManagedProfile(getSystemContext(), adminFlat, parentUserId, enginePkg)
+                reply?.writeInt(result)
+            } catch (e: Exception) {
+                DiagnosticLog.e(TAG, "setupManagedProfile failed", e)
+                reply?.writeInt(-1)
+            }
+            return true
+        }
         return super.onTransact(code, data, reply, flags)
     }
 
@@ -131,6 +150,96 @@ class PrivilegedRemoteWorker: Binder() {
         catch (e: ReflectiveOperationException) {
             DiagnosticLog.e(TAG, "Error retrieving system context", e) }
         throw UnsupportedOperationException()
+    }
+
+    /**
+     * Create a managed profile and set up PrismSpace as profile owner, all via DevicePolicyManager
+     * hidden APIs. Unlike shell commands (pm/dpm/am), these APIs work in the Dhizuku server process
+     * because DPM authorizes based on Device Owner identity, not shell UID.
+     *
+     * Steps: createAndManageUser (creates profile + sets profile owner) → install engine → start user.
+     * Returns the new user id, or -1 on failure.
+     */
+    private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
+        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val um = context.getSystemService(Context.USER_SERVICE) as UserManager
+
+        // 1. Get Dhizuku's Device Owner ComponentName (the admin that DPM will authorize).
+        val deviceOwner = dpm.deviceOwnerComponentOnAnyUser ?: run {
+            DiagnosticLog.e(TAG, "setupManagedProfile: no device owner found")
+            return -1
+        }
+
+        // 2. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
+        //    This is the Device-Owner-friendly equivalent of `pm create-user --managed` + `dpm set-profile-owner`.
+        val prismAdmin = ComponentName.unflattenFromString(adminFlat) ?: run {
+            DiagnosticLog.e(TAG, "setupManagedProfile: invalid admin component: $adminFlat")
+            return -1
+        }
+        DiagnosticLog.i(TAG, "createAndManageUser deviceOwner=$deviceOwner profileOwner=$prismAdmin")
+
+        val userHandle: UserHandle? = try {
+            val createMethod = DevicePolicyManager::class.java.getMethod(
+                "createAndManageUser",
+                ComponentName::class.java, String::class.java, ComponentName::class.java,
+                PersistableBundle::class.java, Int::class.javaPrimitiveType
+            )
+            // flags = 2 (SKIP_SETUP_WIZARD) so the new profile doesn't show a setup wizard.
+            createMethod.invoke(dpm, deviceOwner, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
+        } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "createAndManageUser failed", e)
+            null
+        }
+        if (userHandle == null) {
+            DiagnosticLog.e(TAG, "createAndManageUser returned null")
+            return -1
+        }
+
+        // UserHandle.getIdentifier() is @hide — use reflection.
+        val userId = try {
+            UserHandle::class.java.getMethod("getIdentifier").invoke(userHandle) as Int
+        } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "Failed to get user id from UserHandle", e)
+            return -1
+        }
+        DiagnosticLog.i(TAG, "Created managed profile userId=$userId")
+
+        // 3. Install engine into the new profile (engine is the PrismSpace app itself, already
+        //    installed in the parent user, so installExistingPackage copies it across).
+        try {
+            val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId))
+            if (profileContext != null) {
+                val pm = profileContext.packageManager
+                if (SDK_INT >= Q) {
+                    pm.packageInstaller.installExistingPackage(enginePkg, INSTALL_REASON_USER, null)
+                } else {
+                    PackageManager::class.java
+                        .getMethod("installExistingPackageAsUser", String::class.java, Int::class.java)
+                        .invoke(pm, enginePkg, userId)
+                }
+                // Poll briefly — installExistingPackage is fast for an already-on-device package.
+                repeat(20) {
+                    if (isInstalledForUser(pm, enginePkg)) {
+                        DiagnosticLog.i(TAG, "Engine installed userId=$userId poll=$it")
+                        return@repeat
+                    }
+                    Thread.sleep(150)
+                }
+            }
+        } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "Engine install failed userId=$userId", e)
+        }
+
+        // 4. Start the new user so the profile becomes active.
+        try {
+            val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
+            startUserMethod.invoke(um, userId)
+            DiagnosticLog.i(TAG, "User started userId=$userId")
+        } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "startUser failed userId=$userId", e)
+        }
+
+        return userId
     }
 
     /**
@@ -161,6 +270,7 @@ class PrivilegedRemoteWorker: Binder() {
         const val TRANSACTION_CLONE_APP = IBinder.FIRST_CALL_TRANSACTION
         const val TRANSACTION_SET_APP_OP_MODE = IBinder.FIRST_CALL_TRANSACTION + 1
         const val TRANSACTION_EXEC_SHELL = IBinder.FIRST_CALL_TRANSACTION + 2
+        const val TRANSACTION_SETUP_PROFILE = IBinder.FIRST_CALL_TRANSACTION + 3
         const val APP_OP_MODE_ALLOWED = AppOpsManager.MODE_ALLOWED
         const val APP_OP_MODE_IGNORED = AppOpsManager.MODE_IGNORED
         private const val TAG = "Prism.PRW"
