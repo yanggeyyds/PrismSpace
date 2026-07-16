@@ -82,7 +82,7 @@ jobs:
 
       - name: Build release APK
         run: |
-          gradle wrapper --gradle-version 8.13
+          chmod +x ./gradlew
           ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease -Dorg.gradle.internal.http.connectionTimeout=30000 -Dorg.gradle.internal.http.socketTimeout=120000
 
       - name: Prepare release assets
