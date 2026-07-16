@@ -46,6 +46,7 @@
     <string name="button_setup_help">创建帮助</string>
     <string name="button_have_checked">我已检查</string>
     <string name="button_setup_space_with_root">通过 ROOT 创建双开空间</string>
+    <string name="button_setup_space_with_dhizuku">通过 Dhizuku 创建双开空间</string>
     <string name="prism_help_setup_title">创建帮助</string>
     <string name="prism_help_setup_body">棱镜空间通过 Android 工作资料创建独立的双开空间。\n\n如果创建失败，先检查这些项目：\n· 允许棱镜空间后台运行和自启动。\n· 系统创建页面工作时不要手动关闭。\n· 关闭安全中心或电池策略对棱镜空间的限制后重试。\n· Root 创建仅作为普通创建被系统拦截后的高级兜底。</string>
     <string name="prism_help_clone_title">复制应用帮助</string>

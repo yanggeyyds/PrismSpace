@@ -51,6 +51,7 @@
     <string name="button_setup_help">Setup help</string>
     <string name="button_have_checked">I\'ve checked</string>
     <string name="button_setup_space_with_root">Setup PrismSpace with root</string>
+    <string name="button_setup_space_with_dhizuku">Setup PrismSpace with Dhizuku</string>
     <string name="prism_help_setup_title">Setup help</string>
     <string name="prism_help_setup_body">PrismSpace creates a managed clone space through Android work profile setup.\n\nIf setup fails, check these items first:\n· Keep PrismSpace allowed to run in the background.\n· Do not close the system provisioning screen while it is working.\n· Disable aggressive security or battery restrictions for PrismSpace, then retry.\n· Use root setup only as an advanced fallback when normal setup is blocked.</string>
     <string name="prism_help_clone_title">Copy app help</string>

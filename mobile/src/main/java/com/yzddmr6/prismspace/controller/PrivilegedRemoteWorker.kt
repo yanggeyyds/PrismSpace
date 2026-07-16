@@ -69,6 +69,18 @@ class PrivilegedRemoteWorker: Binder() {
             scheduleProcessExit()
             return true
         }
+        if (code == TRANSACTION_EXEC_SHELL) {
+            val command = data.readString()
+            DiagnosticLog.i(TAG, "exec shell: $command")
+            try {
+                val result = execShell(command ?: "")
+                reply?.writeString(result)
+            } catch (e: Exception) {
+                DiagnosticLog.e(TAG, "exec shell failed", e)
+                reply?.writeString(null)
+            }
+            return true
+        }
         if (code == TRANSACTION_CLONE_APP) {
             val pkg = data.readString()!!
             val userId = data.readInt()
@@ -121,6 +133,26 @@ class PrivilegedRemoteWorker: Binder() {
         throw UnsupportedOperationException()
     }
 
+    /**
+     * Execute a shell command in the Dhizuku server process (Device Owner privileges).
+     * Used for managed-profile setup: `pm create-user --profileOf ... --managed`,
+     * `pm install --user ...`, `dpm set-profile-owner`, `am start-user`.
+     */
+    private fun execShell(command: String): String {
+        val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+        // Read stdout and stderr concurrently to avoid deadlock when the OS pipe
+        // buffer fills on one stream while we're blocked reading the other.
+        val stderrThread = Thread {
+            try { process.errorStream.bufferedReader().readText() }
+            catch (e: Exception) { DiagnosticLog.e(TAG, "execShell stderr read failed", e) }
+        }.also { it.isDaemon = true; it.start() }
+        val stdout = process.inputStream.bufferedReader().readText()
+        val exitCode = process.waitFor()
+        stderrThread.join(2000)
+        DiagnosticLog.i(TAG, "execShell done exit=$exitCode stdout=${stdout.take(200)}")
+        return stdout
+    }
+
     init { DiagnosticLog.i(TAG, "Running in privileged service...") }
 
     companion object {
@@ -128,6 +160,7 @@ class PrivilegedRemoteWorker: Binder() {
         private const val TRANSACTION_DESTROY = 16777115
         const val TRANSACTION_CLONE_APP = IBinder.FIRST_CALL_TRANSACTION
         const val TRANSACTION_SET_APP_OP_MODE = IBinder.FIRST_CALL_TRANSACTION + 1
+        const val TRANSACTION_EXEC_SHELL = IBinder.FIRST_CALL_TRANSACTION + 2
         const val APP_OP_MODE_ALLOWED = AppOpsManager.MODE_ALLOWED
         const val APP_OP_MODE_IGNORED = AppOpsManager.MODE_IGNORED
         private const val TAG = "Prism.PRW"

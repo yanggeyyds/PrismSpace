@@ -2,11 +2,15 @@ package com.yzddmr6.prismspace.setup.compose
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
+import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.dhizuku.api.DhizukuRequestPermissionListener
 import com.yzddmr6.prismspace.help.PrismHelp
 import com.yzddmr6.prismspace.mobile.R
 import com.yzddmr6.prismspace.setup.PrismSetup
@@ -39,6 +43,17 @@ class SetupController(
             stateVm.setUiState(errorVm.toErrorState())
             return
         }
+        // checkManagedProvisioningPrerequisites returned null — either standard provisioning
+        // is allowed, or Dhizuku is the device owner AND authorized. When Dhizuku is the device
+        // owner, the standard ACTION_PROVISION_MANAGED_PROFILE intent is rejected by the OS
+        // (a device owner already exists), so route through the Dhizuku privileged worker.
+        // We check only the device-owner package here — authorization was already verified
+        // by checkManagedProvisioningPrerequisites, so no redundant reflection is needed.
+        val deviceOwner = com.yzddmr6.prismspace.util.DevicePolicies(activity).getDeviceOwner()
+        if ("com.rosan.dhizuku" == deviceOwner) {
+            PrismSetup.requestProfileOwnerSetupWithDhizuku(Activities.findActivityFrom(activity))
+            return
+        }
         launchManagedProvisioning()
     }
 
@@ -53,6 +68,13 @@ class SetupController(
             R.string.button_setup_space_with_root -> {
                 PrismSetup.requestProfileOwnerSetupWithRoot(Activities.findActivityFrom(activity))
             }
+            R.string.button_setup_space_with_dhizuku -> {
+                // Dhizuku is the device owner but hasn't authorized PrismSpace yet.
+                // Request Dhizuku permission; on grant, proceed with the Dhizuku
+                // provisioning path (which bypasses the standard intent that the OS
+                // rejects when a device owner already exists).
+                requestDhizukuPermissionAndSetup()
+            }
             else -> Log.w(TAG, "Unhandled extra action: $extraActionRes")
         }
     }
@@ -65,6 +87,33 @@ class SetupController(
     /** Dismiss error and return to welcome. */
     fun onDismissError() {
         stateVm.setUiState(SetupUiState.Welcome)
+    }
+
+    /**
+     * Requests Dhizuku permission. On grant, kicks off the Dhizuku provisioning path
+     * (create managed profile via privileged worker). On denial or failure, stays on
+     * the current error state so the user can retry.
+     */
+    private fun requestDhizukuPermissionAndSetup() {
+        val context = activity.applicationContext
+        val initialized = try { Dhizuku.init(context) } catch (e: RuntimeException) { false }
+        if (!initialized) {
+            Log.w(TAG, "Dhizuku not available — cannot request permission")
+            return
+        }
+        try {
+            Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+                override fun onRequestPermission(grantResult: Int) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        PrismSetup.requestProfileOwnerSetupWithDhizuku(Activities.findActivityFrom(activity))
+                    } else {
+                        Log.w(TAG, "Dhizuku permission denied by user")
+                    }
+                }
+            })
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "Dhizuku requestPermission failed", e)
+        }
     }
 
     private fun launchManagedProvisioning() {

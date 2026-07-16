@@ -82,6 +82,17 @@ public class SetupViewModel {
 
 		final String device_owner = new DevicePolicies(context).getDeviceOwner();
 		if (device_owner != null) {
+			// Dhizuku as device owner is a supported configuration: it shares Device Owner privileges
+			// with PrismSpace so the managed profile can be created through Dhizuku's privileged worker,
+			// bypassing the standard ACTION_PROVISION_MANAGED_PROFILE flow (which is blocked when a
+			// device owner already exists). Only offer this path when Dhizuku has authorized us.
+			final boolean is_dhizuku = "com.rosan.dhizuku".equals(device_owner);
+			final boolean is_dhizuku_authorized = is_dhizuku && isDhizukuAuthorized(context);
+			if (is_dhizuku_authorized) {
+				reason("dhizuku_device_owner").with(ITEM_ID, device_owner).send();
+				return null;	// Prerequisites OK — SetupController will use the Dhizuku provisioning path.
+			}
+
 			CharSequence owner_label = null;
 			try {
 				owner_label = pm.getApplicationInfo(device_owner, PackageManager.MATCH_UNINSTALLED_PACKAGES).loadLabel(pm);
@@ -89,7 +100,10 @@ public class SetupViewModel {
 
 			final SetupViewModel error = buildErrorVM(R.string.setup_error_managed_device, reason("managed_device").with(ITEM_ID, device_owner));
 			error.message_params = new String[] { owner_label != null ? owner_label.toString() : device_owner };
-			error.action_extra = 0;		// Disable the manual-setup prompt, because device owner cannot be removed by 3rd-party.
+			if (is_dhizuku)
+				error.action_extra = R.string.button_setup_space_with_dhizuku;	// Dhizuku installed but not yet authorized.
+			else
+				error.action_extra = 0;		// Disable the manual-setup prompt, because device owner cannot be removed by 3rd-party.
 			return error;
 		}
 
@@ -99,6 +113,18 @@ public class SetupViewModel {
 
 	private static Analytics.Event reason(final String reason) {
 		return Analytics.$().event("setup_prism_failure").with(Analytics.Param.ITEM_CATEGORY, reason);
+	}
+
+	/** Returns true if Dhizuku is activated and has granted permission to this app. */
+	private static boolean isDhizukuAuthorized(final Context context) {
+		try {
+			final Class<?> dhizukuClass = Class.forName("com.rosan.dhizuku.api.Dhizuku");
+			final java.lang.reflect.Method init = dhizukuClass.getMethod("init", Context.class);
+			final java.lang.reflect.Method isGranted = dhizukuClass.getMethod("isPermissionGranted");
+			return (boolean) init.invoke(null, context.getApplicationContext()) && (boolean) isGranted.invoke(null);
+		} catch (final Exception e) {
+			return false;
+		}
 	}
 
 	private static SetupViewModel buildErrorVM(final @StringRes int message, final @Nullable Analytics.Event event) {
