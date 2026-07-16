@@ -57,9 +57,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Generate Gradle wrapper with local distribution
-        run: gradle wrapper --gradle-version 8.13
-
       - name: Resolve release version
         id: version
         run: ./scripts/resolve-release-version.sh --bump "${{ inputs.bump }}" --version "${{ inputs.version }}" --write-env "$GITHUB_OUTPUT"
@@ -78,7 +75,9 @@ jobs:
           fi
 
       - name: Build release APK
-        run: ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease
+        run: |
+          gradle wrapper --gradle-version 8.13
+          ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease
 
       - name: Prepare release assets
         id: assets
