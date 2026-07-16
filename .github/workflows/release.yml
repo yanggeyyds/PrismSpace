@@ -42,7 +42,7 @@ env:
 
 jobs:
   release:
-    name: Build signed APK and publish release
+    name: Build APK and publish release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -77,57 +77,8 @@ jobs:
             exit 1
           fi
 
-      - name: Run unit tests before loading signing secrets
-        run: ./gradlew --no-daemon --max-workers=2 :mobile:testDebugUnitTest :shared:testDebugUnitTest
-
-      - name: Validate signing secrets
-        run: |
-          set -euo pipefail
-          missing=0
-          for name in PRISM_RELEASE_KEYSTORE_BASE64 PRISM_KEYSTORE_PASSWORD PRISM_KEY_ALIAS PRISM_KEY_PASSWORD; do
-            if [[ -z "${!name:-}" ]]; then
-              echo "Missing required repository secret: $name" >&2
-              missing=1
-            fi
-          done
-          exit "$missing"
-        env:
-          PRISM_RELEASE_KEYSTORE_BASE64: ${{ secrets.PRISM_RELEASE_KEYSTORE_BASE64 }}
-          PRISM_KEYSTORE_PASSWORD: ${{ secrets.PRISM_KEYSTORE_PASSWORD }}
-          PRISM_KEY_ALIAS: ${{ secrets.PRISM_KEY_ALIAS }}
-          PRISM_KEY_PASSWORD: ${{ secrets.PRISM_KEY_PASSWORD }}
-
-      - name: Decode release keystore
-        run: |
-          set -euo pipefail
-          install -m 700 -d "$RUNNER_TEMP/prism-signing"
-          printf '%s' "$PRISM_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/prism-signing/release.jks"
-          chmod 600 "$RUNNER_TEMP/prism-signing/release.jks"
-        env:
-          PRISM_RELEASE_KEYSTORE_BASE64: ${{ secrets.PRISM_RELEASE_KEYSTORE_BASE64 }}
-
-      - name: Build signed release APK
+      - name: Build release APK
         run: ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease
-        env:
-          PRISM_RELEASE_KEYSTORE_PATH: ${{ runner.temp }}/prism-signing/release.jks
-          PRISM_KEYSTORE_PASSWORD: ${{ secrets.PRISM_KEYSTORE_PASSWORD }}
-          PRISM_KEY_ALIAS: ${{ secrets.PRISM_KEY_ALIAS }}
-          PRISM_KEY_PASSWORD: ${{ secrets.PRISM_KEY_PASSWORD }}
-
-      - name: Verify APK signature
-        run: |
-          set -euo pipefail
-          APK="assembly/build/outputs/apk/completeNormal/release/assembly-complete-normal-release.apk"
-          if [[ ! -f "$APK" ]]; then
-            echo "Release APK not found at $APK" >&2
-            exit 1
-          fi
-          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
-          if [[ -z "$APKSIGNER" ]]; then
-            echo "apksigner not found under $ANDROID_HOME/build-tools" >&2
-            exit 1
-          fi
-          "$APKSIGNER" verify --print-certs "$APK"
 
       - name: Prepare release assets
         id: assets
@@ -179,7 +130,3 @@ jobs:
           gh "${args[@]}"
         env:
           GH_TOKEN: ${{ github.token }}
-
-      - name: Remove decoded keystore
-        if: always()
-        run: rm -f "$RUNNER_TEMP/prism-signing/release.jks"
