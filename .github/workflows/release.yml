@@ -57,8 +57,8 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Generate Gradle wrapper with local distribution
+        run: gradle wrapper --gradle-version 8.13
 
       - name: Resolve release version
         id: version
