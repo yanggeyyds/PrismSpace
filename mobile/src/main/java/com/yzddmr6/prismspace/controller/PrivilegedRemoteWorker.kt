@@ -165,7 +165,16 @@ class PrivilegedRemoteWorker: Binder() {
         val um = context.getSystemService(Context.USER_SERVICE) as UserManager
 
         // 1. Get Dhizuku's Device Owner ComponentName (the admin that DPM will authorize).
-        val deviceOwner = dpm.deviceOwnerComponentOnAnyUser ?: run {
+        //    getDeviceOwnerComponentOnAnyUser is @SystemApi — use reflection.
+        val deviceOwner = try {
+            DevicePolicyManager::class.java
+                .getMethod("getDeviceOwnerComponentOnAnyUser")
+                .invoke(dpm) as? ComponentName
+        } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "getDeviceOwnerComponentOnAnyUser failed", e)
+            null
+        }
+        if (deviceOwner == null) {
             DiagnosticLog.e(TAG, "setupManagedProfile: no device owner found")
             return -1
         }
