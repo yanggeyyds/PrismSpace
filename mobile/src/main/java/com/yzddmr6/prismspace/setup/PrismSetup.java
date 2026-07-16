@@ -193,8 +193,8 @@ public class PrismSetup {
 							service.transact(com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.TRANSACTION_EXEC_SHELL, data, reply, 0);
 							output.set(reply.readString());
 						} catch (Exception e) {
-							com.yzddmr6.prismspace.analytics.DiagnosticLog.e("PrismSetup", "Dhizuku exec failed", e);
-						} finally {
+						com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku exec failed", e);
+					} finally {
 							latch.countDown();
 							try { dhizukuClass.getMethod("unbindUserService", android.content.ServiceConnection.class).invoke(null, this); }
 							catch (Exception ignored) {}
@@ -209,7 +209,7 @@ public class PrismSetup {
 			latch.await(60, java.util.concurrent.TimeUnit.SECONDS);
 			return output.get();
 		} catch (Exception e) {
-			com.yzddmr6.prismspace.analytics.DiagnosticLog.e("PrismSetup", "Dhizuku exec setup failed", e);
+			com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku exec setup failed", e);
 			return null;
 		}
 	}
