@@ -117,7 +117,10 @@ class PrivilegedRemoteWorker: Binder() {
             val enginePkg = data.readString()!!
             DiagnosticLog.i(TAG, "setupManagedProfile admin=$adminFlat parent=$parentUserId engine=$enginePkg")
             try {
-                val result = setupManagedProfile(getSystemContext(), adminFlat, parentUserId, enginePkg)
+                // CRITICAL: use the privileged app's own context (Dhizuku/Shizuku process), NOT
+                // getSystemContext() — system context has opPackageName="android" which makes DPM's
+                // getCallerIdentity() reject the call (package doesn't match Device Owner's package).
+                val result = setupManagedProfile(getPrivilegedContext(), adminFlat, parentUserId, enginePkg)
                 reply?.writeInt(result)
             } catch (e: Exception) {
                 DiagnosticLog.e(TAG, "setupManagedProfile failed", e)
@@ -153,50 +156,112 @@ class PrivilegedRemoteWorker: Binder() {
     }
 
     /**
-     * Create a managed profile and set up PrismSpace as profile owner, all via DevicePolicyManager
-     * hidden APIs. Unlike shell commands (pm/dpm/am), these APIs work in the Dhizuku server process
-     * because DPM authorizes based on Device Owner identity, not shell UID.
+     * Returns the privileged app's own Application context.
      *
-     * Steps: createAndManageUser (creates profile + sets profile owner) → install engine → start user.
-     * Returns the new user id, or -1 on failure.
+     * When running inside the Dhizuku server process (via bindUserService), this returns Dhizuku's
+     * Application context — whose opPackageName is "com.rosan.dhizuku" (the Device Owner's package).
+     * This is CRITICAL for DPM calls: DevicePolicyManagerService.getCallerIdentity() verifies that
+     * the calling package matches the Device Owner's package. getSystemContext() returns a context
+     * with opPackageName="android" which fails this check.
+     *
+     * When running inside the Shizuku server process, this returns Shizuku's Application context
+     * (shell UID) — fine for cloneAppViaPrivileged which only uses PackageManager, not DPM.
      */
-    private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
-        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val um = context.getSystemService(Context.USER_SERVICE) as UserManager
+    private fun getPrivilegedContext(): Context {
+        try {
+            val classActivityThread = Class.forName("android.app.ActivityThread")
+            val at = classActivityThread.getMethod("currentActivityThread").invoke(null)
+            val app = classActivityThread.getMethod("currentApplication").invoke(at) as? Context
+            if (app != null) {
+                DiagnosticLog.i(TAG, "getPrivilegedContext: package=${app.packageName}")
+                return app
+            }
+        } catch (e: ReflectiveOperationException) {
+            DiagnosticLog.e(TAG, "getPrivilegedContext: currentApplication failed, falling back to system context", e)
+        }
+        return getSystemContext()
+    }
 
-        // 1. Get Dhizuku's Device Owner ComponentName (the admin that DPM will authorize).
-        //    getDeviceOwnerComponentOnAnyUser is @SystemApi — use reflection.
-        val deviceOwner = try {
+    /**
+     * Find the Device Owner's DeviceAdminReceiver ComponentName using public APIs only.
+     *
+     * getDeviceOwnerComponentOnAnyUser() is @SystemApi requiring MANAGE_PROFILE_AND_DEVICE_OWNERS
+     * permission — not available to app-UID processes. Instead, we use the public getActiveAdmins()
+     * which returns all active device admins; the Device Owner's admin will be among them.
+     */
+    private fun findDeviceOwnerAdmin(dpm: DevicePolicyManager): ComponentName? {
+        // Try public API first: getActiveAdmins() returns List<ComponentName> of active admins.
+        val admins = try { dpm.activeAdmins } catch (e: Exception) {
+            DiagnosticLog.e(TAG, "getActiveAdmins failed", e)
+            null
+        }
+        if (admins != null && admins.isNotEmpty()) {
+            DiagnosticLog.i(TAG, "getActiveAdmins returned: $admins")
+            // The Device Owner admin belongs to the Device Owner app (e.g. "com.rosan.dhizuku").
+            // Return the first one — in a Dhizuku-managed device, Dhizuku's admin is the primary
+            // (and likely only) device admin.
+            return admins.first()
+        }
+        // Fallback: try hidden API getDeviceOwnerComponentOnAnyUser (may throw SecurityException).
+        return try {
             DevicePolicyManager::class.java
                 .getMethod("getDeviceOwnerComponentOnAnyUser")
                 .invoke(dpm) as? ComponentName
         } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "getDeviceOwnerComponentOnAnyUser failed", e)
+            DiagnosticLog.e(TAG, "getDeviceOwnerComponentOnAnyUser fallback failed", e)
             null
         }
-        if (deviceOwner == null) {
-            DiagnosticLog.e(TAG, "setupManagedProfile: no device owner found")
+    }
+
+    /**
+     * Create a managed profile and set up PrismSpace as profile owner, all via DevicePolicyManager
+     * hidden APIs. Unlike shell commands (pm/dpm/am), these APIs work in the Dhizuku server process
+     * because DPM authorizes based on Device Owner identity, not shell UID.
+     *
+     * CRITICAL: the [context] must be the Dhizuku app's own Application context (via
+     * [getPrivilegedContext]), NOT getSystemContext(). DPM's getCallerIdentity() checks both the
+     * calling UID AND the calling package name against the Device Owner's registered package.
+     *
+     * Steps:
+     * 1. Find Device Owner admin via getActiveAdmins() (public API)
+     * 2. createAndManageUser — creates managed profile + sets PrismSpace as profile owner.
+     *    DPM internally installs the profile owner's package into the new user if not present.
+     * 3. Start the new user.
+     * Returns the new user id (≥0) on success, or -1 on failure.
+     */
+    private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
+        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val um = context.getSystemService(Context.USER_SERVICE) as UserManager
+        DiagnosticLog.i(TAG, "setupManagedProfile ctxPkg=${context.packageName} admin=$adminFlat parent=$parentUserId engine=$enginePkg")
+
+        // 1. Find the Device Owner's admin ComponentName (Dhizuku's DeviceAdminReceiver).
+        val deviceOwnerAdmin = findDeviceOwnerAdmin(dpm) ?: run {
+            DiagnosticLog.e(TAG, "setupManagedProfile: no device owner admin found")
             return -1
         }
+        DiagnosticLog.i(TAG, "Device owner admin: $deviceOwnerAdmin")
 
-        // 2. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
-        //    This is the Device-Owner-friendly equivalent of `pm create-user --managed` + `dpm set-profile-owner`.
+        // 2. Parse PrismSpace's admin ComponentName (the intended profile owner).
         val prismAdmin = ComponentName.unflattenFromString(adminFlat) ?: run {
             DiagnosticLog.e(TAG, "setupManagedProfile: invalid admin component: $adminFlat")
             return -1
         }
-        DiagnosticLog.i(TAG, "createAndManageUser deviceOwner=$deviceOwner profileOwner=$prismAdmin")
 
+        // 3. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
+        //    DPM will:
+        //    a) create the managed-profile user
+        //    b) install the profile owner's package (PrismSpace/engine) into the new user if needed
+        //    c) set the profile owner to prismAdmin
+        //    flags = 2 (SKIP_SETUP_WIZARD) so the new profile doesn't show a setup wizard.
         val userHandle: UserHandle? = try {
             val createMethod = DevicePolicyManager::class.java.getMethod(
                 "createAndManageUser",
                 ComponentName::class.java, String::class.java, ComponentName::class.java,
                 PersistableBundle::class.java, Int::class.javaPrimitiveType
             )
-            // flags = 2 (SKIP_SETUP_WIZARD) so the new profile doesn't show a setup wizard.
-            createMethod.invoke(dpm, deviceOwner, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
+            createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
         } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "createAndManageUser failed", e)
+            DiagnosticLog.e(TAG, "createAndManageUser failed (admin=$deviceOwnerAdmin profileOwner=$prismAdmin)", e)
             null
         }
         if (userHandle == null) {
@@ -213,33 +278,38 @@ class PrivilegedRemoteWorker: Binder() {
         }
         DiagnosticLog.i(TAG, "Created managed profile userId=$userId")
 
-        // 3. Install engine into the new profile (engine is the PrismSpace app itself, already
-        //    installed in the parent user, so installExistingPackage copies it across).
+        // 4. Ensure engine is installed in the new profile (createAndManageUser may already do this,
+        //    but verify + install as fallback — needed on some Android versions).
         try {
             val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId))
             if (profileContext != null) {
                 val pm = profileContext.packageManager
-                if (SDK_INT >= Q) {
-                    pm.packageInstaller.installExistingPackage(enginePkg, INSTALL_REASON_USER, null)
-                } else {
-                    PackageManager::class.java
-                        .getMethod("installExistingPackageAsUser", String::class.java, Int::class.java)
-                        .invoke(pm, enginePkg, userId)
-                }
-                // Poll briefly — installExistingPackage is fast for an already-on-device package.
-                repeat(20) {
-                    if (isInstalledForUser(pm, enginePkg)) {
-                        DiagnosticLog.i(TAG, "Engine installed userId=$userId poll=$it")
-                        return@repeat
+                if (!isInstalledForUser(pm, enginePkg)) {
+                    DiagnosticLog.i(TAG, "Engine not installed yet, installing userId=$userId")
+                    if (SDK_INT >= Q) {
+                        pm.packageInstaller.installExistingPackage(enginePkg, INSTALL_REASON_USER, null)
+                    } else {
+                        PackageManager::class.java
+                            .getMethod("installExistingPackageAsUser", String::class.java, Int::class.java)
+                            .invoke(pm, enginePkg, userId)
                     }
-                    Thread.sleep(150)
+                    // Poll briefly — installExistingPackage is fast for an already-on-device package.
+                    repeat(20) {
+                        if (isInstalledForUser(pm, enginePkg)) {
+                            DiagnosticLog.i(TAG, "Engine installed userId=$userId poll=$it")
+                            return@repeat
+                        }
+                        Thread.sleep(150)
+                    }
+                } else {
+                    DiagnosticLog.i(TAG, "Engine already installed userId=$userId (createAndManageUser handled it)")
                 }
             }
         } catch (e: Exception) {
             DiagnosticLog.e(TAG, "Engine install failed userId=$userId", e)
         }
 
-        // 4. Start the new user so the profile becomes active.
+        // 5. Start the new user so the profile becomes active.
         try {
             val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
             startUserMethod.invoke(um, userId)
