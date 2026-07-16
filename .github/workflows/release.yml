@@ -39,6 +39,8 @@ env:
   ANDROID_HOME: /usr/local/lib/android/sdk
   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
   GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+  # 禁用gradle/actions/setup-gradle注入的本地代理
+  DEVELOCITY_INJECTION_ENABLED: false
 
 jobs:
   release:
@@ -56,6 +58,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Clean Gradle proxy cache
+        run: |
+          rm -rf ~/.gradle/init.d ~/.gradle/gradle.properties 2>/dev/null || true
 
       - name: Resolve release version
         id: version
@@ -77,7 +83,7 @@ jobs:
       - name: Build release APK
         run: |
           gradle wrapper --gradle-version 8.13
-          ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease
+          ./gradlew --no-daemon --max-workers=2 :assembly:assembleCompleteNormalRelease -Dorg.gradle.internal.http.connectionTimeout=30000 -Dorg.gradle.internal.http.socketTimeout=120000
 
       - name: Prepare release assets
         id: assets
