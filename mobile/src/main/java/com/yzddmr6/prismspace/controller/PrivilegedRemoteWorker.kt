@@ -117,11 +117,18 @@ class PrivilegedRemoteWorker: Binder() {
             val enginePkg = data.readString()!!
             DiagnosticLog.i(TAG, "setupManagedProfile admin=$adminFlat parent=$parentUserId engine=$enginePkg")
             try {
-                // CRITICAL: use the privileged app's own context (Dhizuku/Shizuku process), NOT
-                // getSystemContext() — system context has opPackageName="android" which makes DPM's
-                // getCallerIdentity() reject the call (package doesn't match Device Owner's package).
-                val result = setupManagedProfile(getPrivilegedContext(), adminFlat, parentUserId, enginePkg)
-                reply?.writeInt(result)
+                // CRITICAL: Binder.getCallingUid() in onTransact returns the CALLER's UID (PrismSpace),
+                // NOT this worker process's UID (Dhizuku). DPM's getCallerIdentity() uses
+                // Binder.getCallingUid() to check if the caller is Device Owner — PrismSpace is NOT
+                // Device Owner, so createAndManageUser would be rejected.
+                // Fix: clear calling identity so DPM sees THIS process's UID (Dhizuku = Device Owner).
+                val token = Binder.clearCallingIdentity()
+                try {
+                    val result = setupManagedProfile(getPrivilegedContext(), adminFlat, parentUserId, enginePkg)
+                    reply?.writeInt(result)
+                } finally {
+                    Binder.restoreCallingIdentity(token)
+                }
             } catch (e: Exception) {
                 DiagnosticLog.e(TAG, "setupManagedProfile failed", e)
                 reply?.writeInt(-1)
@@ -187,20 +194,21 @@ class PrivilegedRemoteWorker: Binder() {
      *
      * getDeviceOwnerComponentOnAnyUser() is @SystemApi requiring MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission — not available to app-UID processes. Instead, we use the public getActiveAdmins()
-     * which returns all active device admins; the Device Owner's admin will be among them.
+     * which returns all active device admins; we filter for the Dhizuku package to ensure we get
+     * the correct admin (the device may have multiple admins from different apps).
      */
     private fun findDeviceOwnerAdmin(dpm: DevicePolicyManager): ComponentName? {
-        // Try public API first: getActiveAdmins() returns List<ComponentName> of active admins.
         val admins = try { dpm.activeAdmins } catch (e: Exception) {
             DiagnosticLog.e(TAG, "getActiveAdmins failed", e)
             null
         }
         if (admins != null && admins.isNotEmpty()) {
             DiagnosticLog.i(TAG, "getActiveAdmins returned: $admins")
-            // The Device Owner admin belongs to the Device Owner app (e.g. "com.rosan.dhizuku").
-            // Return the first one — in a Dhizuku-managed device, Dhizuku's admin is the primary
-            // (and likely only) device admin.
-            return admins.first()
+            // Prefer Dhizuku's admin (package = "com.rosan.dhizuku"); fall back to first admin.
+            val dhizukuAdmin = admins.firstOrNull { it.packageName == "com.rosan.dhizuku" }
+            val admin = dhizukuAdmin ?: admins.first()
+            DiagnosticLog.i(TAG, "Selected device owner admin: $admin (dhizuku=${dhizukuAdmin != null})")
+            return admin
         }
         // Fallback: try hidden API getDeviceOwnerComponentOnAnyUser (may throw SecurityException).
         return try {
