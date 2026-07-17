@@ -121,8 +121,21 @@ public class PrismSetup {
 				execDhizukuSetup(context, flatAdminComponent, parentUserId, enginePkg),
 				(context, result) -> {
 			if (result == null || result < 0) {
-				Analytics.$().event("setup_prism_dhizuku_failed").withRaw("phase", "1")
-						.withRaw("result", String.valueOf(result)).send();
+				final Analytics.Event ev = Analytics.$().event("setup_prism_dhizuku_failed")
+						.withRaw("phase", "1").withRaw("result", String.valueOf(result));
+				if (result != null) {
+					final String reason;
+					switch (result) {
+						case DhizukuSetupRunner.ERR_INIT: reason = "dhizuku_init_failed"; break;
+						case DhizukuSetupRunner.ERR_BIND: reason = "dhizuku_bind_failed"; break;
+						case DhizukuSetupRunner.ERR_TIMEOUT: reason = "dhizuku_timeout"; break;
+						case DhizukuSetupRunner.ERR_TRANSACT: reason = "transact_failed"; break;
+						case DhizukuSetupRunner.ERR_DISCONNECT: reason = "service_disconnected"; break;
+						default: reason = "unknown"; break;
+					}
+					ev.withRaw("reason", reason);
+				}
+				ev.send();
 				dismissProgressAndShowError(context, progress, 1);
 				return;
 			}
@@ -142,62 +155,9 @@ public class PrismSetup {
 		});
 	}
 
-	/**
-	 * Binds the PrivilegedRemoteWorker in the Dhizuku server process and transacts
-	 * {@code TRANSACTION_SETUP_PROFILE}, which creates the managed profile, installs the engine,
-	 * sets the profile owner, and starts the user — all via DevicePolicyManager hidden APIs.
-	 *
-	 * @return the new user id (≥0) on success, or -1 on failure.
-	 */
 	private static Integer execDhizukuSetup(final Context context, final String adminFlat,
 			final int parentUserId, final String enginePkg) {
-		try {
-			final Class<?> dhizukuClass = Class.forName("com.rosan.dhizuku.api.Dhizuku");
-			final Class<?> argsClass = Class.forName("com.rosan.dhizuku.api.DhizukuUserServiceArgs");
-			final java.lang.reflect.Method init = dhizukuClass.getMethod("init", Context.class);
-			if (!(boolean) init.invoke(null, context.getApplicationContext())) return -1;
-
-			final ComponentName component = new ComponentName(context, com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.class);
-			final Object args = argsClass.getConstructor(ComponentName.class).newInstance(component);
-
-			final java.util.concurrent.atomic.AtomicReference<Integer> output = new java.util.concurrent.atomic.AtomicReference<>(-1);
-			final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-
-			final android.content.ServiceConnection conn = new android.content.ServiceConnection() {
-				@Override public void onServiceConnected(ComponentName name, final android.os.IBinder service) {
-					new Thread(() -> {
-						try {
-							final android.os.Parcel data = android.os.Parcel.obtain();
-							final android.os.Parcel reply = android.os.Parcel.obtain();
-							data.writeString(adminFlat);
-							data.writeInt(parentUserId);
-							data.writeString(enginePkg);
-							service.transact(com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.TRANSACTION_SETUP_PROFILE, data, reply, 0);
-							output.set(reply.readInt());
-						} catch (Exception e) {
-							com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku setup transact failed", e);
-						} finally {
-							latch.countDown();
-							try { dhizukuClass.getMethod("unbindUserService", android.content.ServiceConnection.class).invoke(null, this); }
-							catch (Exception ignored) {}
-						}
-					}, "DhizukuSetup").start();
-				}
-				@Override public void onServiceDisconnected(ComponentName name) { latch.countDown(); }
-			};
-
-			final java.lang.reflect.Method bindUserService =
-					dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class);
-			if (!(boolean) bindUserService.invoke(null, args, conn)) {
-				com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku bindUserService returned false", null);
-				return -1;
-			}
-			latch.await(120, java.util.concurrent.TimeUnit.SECONDS);
-			return output.get();
-		} catch (Exception e) {
-			com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku setup bind failed", e);
-			return -1;
-		}
+		return DhizukuSetupRunner.INSTANCE.execSetup(context, adminFlat, parentUserId, enginePkg);
 	}
 
 	/** Return true if user 0 already has any profile other than itself. */
