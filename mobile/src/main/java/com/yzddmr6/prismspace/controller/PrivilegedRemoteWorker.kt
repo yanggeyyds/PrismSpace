@@ -1,7 +1,6 @@
 package com.yzddmr6.prismspace.controller
 
 import android.app.AppOpsManager
-import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,12 +8,8 @@ import android.content.pm.PackageManager.INSTALL_REASON_USER
 import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.os.Binder
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.Q
-import android.os.Build.VERSION_CODES.S_V2
-import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
-import android.os.PersistableBundle
 import android.os.UserHandle
 import android.os.UserManager
 import com.yzddmr6.prismspace.analytics.DiagnosticLog
@@ -230,181 +225,6 @@ class PrivilegedRemoteWorker: Binder() {
             DiagnosticLog.e(TAG, "getPrivilegedContext: currentApplication failed, falling back to system context", e)
         }
         return getSystemContext()
-    }
-
-    /**
-     * Find the Device Owner's DeviceAdminReceiver ComponentName using public APIs only.
-     *
-     * getDeviceOwnerComponentOnAnyUser() is @SystemApi requiring MANAGE_PROFILE_AND_DEVICE_OWNERS
-     * permission — not available to app-UID processes. Instead, we use the public getActiveAdmins()
-     * which returns all active device admins; we filter for the Dhizuku package to ensure we get
-     * the correct admin (the device may have multiple admins from different apps).
-     */
-    private fun findDeviceOwnerAdmin(dpm: DevicePolicyManager): ComponentName? {
-        val admins = try { dpm.activeAdmins } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "getActiveAdmins failed", e)
-            null
-        }
-        if (admins != null && admins.isNotEmpty()) {
-            DiagnosticLog.i(TAG, "getActiveAdmins returned: $admins")
-            // Prefer Dhizuku's admin (package = "com.rosan.dhizuku"); fall back to first admin.
-            val dhizukuAdmin = admins.firstOrNull { it.packageName == "com.rosan.dhizuku" }
-            val admin = dhizukuAdmin ?: admins.first()
-            DiagnosticLog.i(TAG, "Selected device owner admin: $admin (dhizuku=${dhizukuAdmin != null})")
-            return admin
-        }
-        // Fallback: try hidden API getDeviceOwnerComponentOnAnyUser (may throw SecurityException).
-        return try {
-            DevicePolicyManager::class.java
-                .getMethod("getDeviceOwnerComponentOnAnyUser")
-                .invoke(dpm) as? ComponentName
-        } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "getDeviceOwnerComponentOnAnyUser fallback failed", e)
-            null
-        }
-    }
-
-    /**
-     * Create a managed profile and set up PrismSpace as profile owner, all via DevicePolicyManager
-     * hidden APIs. Unlike shell commands (pm/dpm/am), these APIs work in the Dhizuku server process
-     * because DPM authorizes based on Device Owner identity, not shell UID.
-     *
-     * CRITICAL: the [context] must be the Dhizuku app's own Application context (via
-     * [getPrivilegedContext]), NOT getSystemContext(). DPM's getCallerIdentity() checks both the
-     * calling UID AND the calling package name against the Device Owner's registered package.
-     *
-     * Steps:
-     * 1. Find Device Owner admin via getActiveAdmins() (public API)
-     * 2. Snapshot existing profiles to detect hidden API stub
-     * 3. createAndManageUser — creates managed profile + sets PrismSpace as profile owner.
-     *    DPM internally installs the profile owner's package into the new user if not present.
-     * 4. Verify the new profile actually appeared in userProfiles
-     * 5. Install engine into the new profile
-     * 6. Start the new user.
-     * Returns the new user id (≥0) on success, or -1 on failure.
-     */
-    private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
-        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val um = context.getSystemService(Context.USER_SERVICE) as UserManager
-        DiagnosticLog.i(TAG, "setupManagedProfile ctxPkg=${context.packageName} admin=$adminFlat parent=$parentUserId engine=$enginePkg")
-
-        // 1. Find the Device Owner's admin ComponentName (Dhizuku's DeviceAdminReceiver).
-        val deviceOwnerAdmin = findDeviceOwnerAdmin(dpm) ?: run {
-            DiagnosticLog.e(TAG, "setupManagedProfile: no device owner admin found")
-            return -1
-        }
-        DiagnosticLog.i(TAG, "Device owner admin: $deviceOwnerAdmin")
-
-        // 2. Parse PrismSpace's admin ComponentName (the intended profile owner).
-        val prismAdmin = ComponentName.unflattenFromString(adminFlat) ?: run {
-            DiagnosticLog.e(TAG, "setupManagedProfile: invalid admin component: $adminFlat")
-            return -1
-        }
-
-        // 3. Snapshot existing profiles before creating the profile, so we can verify the
-        //    new profile was actually created (hidden API may be silently stubbed on newer OS).
-        val usersBefore = um.userProfiles.map { it.hashCode() }.toSet()
-
-        // 4. Create managed profile + set profile owner via DPM.
-        //    On API 34+ use createManagedProfile (the new API); on API 33- fall back to
-        //    createAndManageUser (deprecated in API 34, may be stubbed).
-        val userHandle: UserHandle? = try {
-            if (SDK_INT >= 34) {
-                val createMethod = DevicePolicyManager::class.java.getMethod(
-                    "createManagedProfile",
-                    ComponentName::class.java, String::class.java, ComponentName::class.java,
-                    Bundle::class.java
-                )
-                createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, null) as? UserHandle
-            } else {
-                val createMethod = DevicePolicyManager::class.java.getMethod(
-                    "createAndManageUser",
-                    ComponentName::class.java, String::class.java, ComponentName::class.java,
-                    PersistableBundle::class.java, Int::class.javaPrimitiveType
-                )
-                createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
-            }
-        } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "createManagedProfile/createAndManageUser failed (admin=$deviceOwnerAdmin profileOwner=$prismAdmin)", e)
-            null
-        }
-        if (userHandle == null) {
-            DiagnosticLog.e(TAG, "createManagedProfile returned null")
-            return -1
-        }
-
-        // UserHandle.getIdentifier() is @hide — use reflection.
-        val userId = try {
-            UserHandle::class.java.getMethod("getIdentifier").invoke(userHandle) as Int
-        } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "Failed to get user id from UserHandle", e)
-            return -1
-        }
-        DiagnosticLog.i(TAG, "createManagedProfile returned userId=$userId")
-
-        // Verify the new profile actually exists in the user list. On Android 14+ the hidden API
-        // may be silently stubbed (returns a fake UserHandle without creating a profile), in which
-        // case userProfiles won't contain the returned userId.
-        val usersAfter = um.userProfiles.map { it.hashCode() }.toSet()
-        val newUsers = usersAfter - usersBefore
-        if (userId !in newUsers) {
-            DiagnosticLog.e(TAG, "createManagedProfile stub detected: returned userId=$userId but no new user appeared (before=$usersBefore after=$usersAfter new=$newUsers)", null)
-            return -1
-        }
-        DiagnosticLog.i(TAG, "Verified new managed profile userId=$userId")
-
-        // 5. Ensure engine is installed in the new profile (createAndManageUser may already do this,
-        //    but verify + install as fallback — needed on some Android versions).
-        try {
-            val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId))
-            if (profileContext != null) {
-                val pm = profileContext.packageManager
-                if (!isInstalledForUser(pm, enginePkg)) {
-                    DiagnosticLog.i(TAG, "Engine not installed yet, installing userId=$userId")
-                    if (SDK_INT >= Q) {
-                        pm.packageInstaller.installExistingPackage(enginePkg, INSTALL_REASON_USER, null)
-                    } else {
-                        PackageManager::class.java
-                            .getMethod("installExistingPackageAsUser", String::class.java, Int::class.java)
-                            .invoke(pm, enginePkg, userId)
-                    }
-                    // Poll briefly — installExistingPackage is fast for an already-on-device package.
-                    repeat(20) {
-                        if (isInstalledForUser(pm, enginePkg)) {
-                            DiagnosticLog.i(TAG, "Engine installed userId=$userId poll=$it")
-                            return@repeat
-                        }
-                        Thread.sleep(150)
-                    }
-                } else {
-                    DiagnosticLog.i(TAG, "Engine already installed userId=$userId (createAndManageUser handled it)")
-                }
-            }
-        } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "Engine install failed userId=$userId", e)
-        }
-
-        // 6. Start the new user so the profile becomes active, then ensure it's not in quiet mode.
-        //    These are best-effort — the profile exists regardless. Hidden APIs may be stubbed
-        //    on Android 14+, so failures are logged but not fatal.
-        val profileHandle = UserHandles.of(userId)
-        if (SDK_INT >= S_V2) {
-            runCatching {
-                val startMethod = UserManager::class.java.getMethod("startUserInBackground", Int::class.javaPrimitiveType)
-                val started = startMethod.invoke(um, userId) as Boolean
-                DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
-            }.onFailure { DiagnosticLog.w(TAG, "startUserInBackground failed userId=$userId", it) }
-        } else {
-            runCatching {
-                val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
-                startUserMethod.invoke(um, userId)
-                DiagnosticLog.i(TAG, "startUser (hidden API) userId=$userId")
-            }.onFailure { DiagnosticLog.w(TAG, "startUser failed userId=$userId", it) }
-        }
-        runCatching { um.requestQuietModeEnabled(false, profileHandle) }
-            .onFailure { DiagnosticLog.w(TAG, "requestQuietModeEnabled failed userId=$userId", it) }
-
-        return userId
     }
 
     /**
