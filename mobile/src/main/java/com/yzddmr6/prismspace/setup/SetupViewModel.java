@@ -118,10 +118,8 @@ public class SetupViewModel {
 	/** Returns true if Dhizuku is activated and has granted permission to this app. */
 	private static boolean isDhizukuAuthorized(final Context context) {
 		try {
-			final Class<?> dhizukuClass = Class.forName("com.rosan.dhizuku.api.Dhizuku");
-			final java.lang.reflect.Method init = dhizukuClass.getMethod("init", Context.class);
-			final java.lang.reflect.Method isGranted = dhizukuClass.getMethod("isPermissionGranted");
-			return (boolean) init.invoke(null, context.getApplicationContext()) && (boolean) isGranted.invoke(null);
+			return com.rosan.dhizuku.api.Dhizuku.init(context.getApplicationContext())
+					&& com.rosan.dhizuku.api.Dhizuku.isPermissionGranted();
 		} catch (final Exception e) {
 			return false;
 		}

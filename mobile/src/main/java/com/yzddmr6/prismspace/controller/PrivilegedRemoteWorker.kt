@@ -29,34 +29,65 @@ class PrivilegedRemoteWorker: Binder() {
      */
     private fun cloneAppViaPrivileged(context: Context, pkg: String, userId: Int): Boolean {
         DiagnosticLog.i(TAG, "cloneAppViaPrivileged start pkg=$pkg userId=$userId")
-        val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId)) ?: return false
-        val pm = profileContext.packageManager
-        if (isInstalledForUser(pm, pkg)) {
+        val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId))
+        val pm = profileContext?.packageManager
+        if (pm != null && isInstalledForUser(pm, pkg)) {
             DiagnosticLog.i(TAG, "cloneAppViaPrivileged already installed pkg=$pkg userId=$userId")
             return true
         }
-        if (SDK_INT >= Q) {
+        if (pm != null && SDK_INT >= Q) {
             pm.packageInstaller.installExistingPackage(pkg, INSTALL_REASON_USER, null)
-        } else try {   // int installExistingPackageAsUser(String packageName, int userId)
-            PackageManager::class.java.getMethod("installExistingPackageAsUser", String::class.java, Int::class.java)
-                .invoke(pm, pkg, userId)
-        } catch (e: PackageManager.NameNotFoundException) { return false }
-        // installExistingPackage is async; an already-on-device package installs fast. Poll the real
-        // installed state (<=3s) and report ground truth instead of assuming success.
+        } else {
+            // Use hidden installExistingPackageAsUser which takes userId directly and
+            // works without needing a per-user context (needed for Dhizuku app-UID process).
+            val installed = try {
+                val method = PackageManager::class.java.getMethod(
+                    "installExistingPackageAsUser", String::class.java, Int::class.java)
+                method.invoke(pm ?: context.packageManager, pkg, userId) as Int
+            } catch (e: PackageManager.NameNotFoundException) { return false }
+            if (installed == INSTALL_SUCCEEDED) {
+                DiagnosticLog.i(TAG, "cloneAppViaPrivileged installed pkg=$pkg userId=$userId")
+                return true
+            }
+        }
+        // installExistingPackage is async. Poll the real installed state (<=3s).
+        val checkInstalled: (String) -> Boolean = if (pm != null) {
+            { p -> isInstalledForUser(pm, p) }
+        } else {
+            { p -> isInstalledForUserId(context.packageManager, p, userId) }
+        }
         repeat(20) {
-            if (isInstalledForUser(pm, pkg)) {
+            if (checkInstalled(pkg)) {
                 DiagnosticLog.i(TAG, "cloneAppViaPrivileged installed pkg=$pkg userId=$userId poll=$it")
                 return true
             }
-            try { Thread.sleep(150) } catch (e: InterruptedException) { Thread.currentThread().interrupt(); return isInstalledForUser(pm, pkg) }
+            try { Thread.sleep(150) } catch (e: InterruptedException) { Thread.currentThread().interrupt(); return checkInstalled(pkg) }
         }
-        val installed = isInstalledForUser(pm, pkg)
+        val installed = checkInstalled(pkg)
         DiagnosticLog.i(TAG, "cloneAppViaPrivileged finished pkg=$pkg userId=$userId installed=$installed")
         return installed
     }
 
     private fun isInstalledForUser(pm: PackageManager, pkg: String): Boolean =
         try { pm.getApplicationInfo(pkg, 0); true } catch (e: PackageManager.NameNotFoundException) { false }
+
+    /** Check if a package is installed for a specific userId using hidden API. */
+    private fun isInstalledForUserId(pm: PackageManager, pkg: String, userId: Int): Boolean = try {
+        val method = PackageManager::class.java.getMethod(
+            "getApplicationInfoAsUser", String::class.java, Int::class.java, Int::class.java)
+        method.invoke(pm, pkg, 0, userId)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    /** Quick probe: can this context create a per-user package context? */
+    private fun hasCrossUserAccess(context: Context): Boolean = try {
+        context.createPackageContextAsUser(context.packageName, 0, android.os.Process.myUserHandle())
+        true
+    } catch (_: SecurityException) {
+        false
+    }
 
     private fun setAppOpModeViaPrivileged(context: Context, pkg: String, userId: Int, op: String, mode: Int): Boolean {
         val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId)) ?: return false
@@ -91,7 +122,15 @@ class PrivilegedRemoteWorker: Binder() {
             val userId = data.readInt()
             DiagnosticLog.i(TAG, "onTransact clone pkg=$pkg userId=$userId")
             try {
-                val result = cloneAppViaPrivileged(getSystemContext(), pkg, userId)
+                // Try getSystemContext() first (works for Shizuku/shell UID).
+                // For Dhizuku (app UID, Device Owner), getSystemContext() may not have
+                // INTERACT_ACROSS_USERS for createPackageContextAsUser, so fallback to
+                // getPrivilegedContext() which is Dhizuku's own Application context.
+                var ctx = runCatching { getSystemContext() }.getOrNull()
+                if (ctx == null || !hasCrossUserAccess(ctx)) {
+                    ctx = getPrivilegedContext()
+                }
+                val result = cloneAppViaPrivileged(ctx, pkg, userId)
                 reply?.writeInt(if (result) 1 else 0) }
             catch (e: Exception) {
                 DiagnosticLog.e(TAG, "Error cloning $pkg via privileged service", e)

@@ -112,11 +112,12 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 		// Dhizuku readiness mirrors the SettingsViewModel check: init must succeed and the user must have
 		// granted the Dhizuku permission. Dhizuku shares Device Owner privileges (activated once, persists
 		// across reboots), so unlike Shizuku there is no "running" state to poll — only authorized or not.
-		val isDhizukuReady = try {
-			Dhizuku.init(context.applicationContext) && Dhizuku.isPermissionGranted()
-		} catch (e: RuntimeException) { false }
+		// Call Dhizuku.init() once and cache the result — it is idempotent but has IPC overhead.
 		val isDhizukuAvailable = try {
 			Dhizuku.init(context.applicationContext)
+		} catch (e: RuntimeException) { false }
+		val isDhizukuReady = isDhizukuAvailable && try {
+			Dhizuku.isPermissionGranted()
 		} catch (e: RuntimeException) { false }
 
 		val fragment = ModelBottomSheetFragment()
@@ -399,7 +400,13 @@ class PrismAppClones(val activity: FragmentActivity, val vm: AndroidViewModel, v
 				}, 20_000)
 				try {
 					DiagnosticLog.i(TAG, "Binding Dhizuku service pkg=$pkg targetUser=${target.toId()}")
-					Dhizuku.bindUserService(args, conn)
+					if (!Dhizuku.bindUserService(args, conn)) {
+						DiagnosticLog.e(TAG, "Dhizuku bindUserService returned false for $pkg")
+						if (done.compareAndSet(false, true)) {
+							main.removeCallbacksAndMessages(null)
+							fail()
+						}
+					}
 				} catch (e: Throwable) {
 					DiagnosticLog.e(TAG, "Dhizuku bindUserService failed for $pkg", e)
 					if (done.compareAndSet(false, true)) {
