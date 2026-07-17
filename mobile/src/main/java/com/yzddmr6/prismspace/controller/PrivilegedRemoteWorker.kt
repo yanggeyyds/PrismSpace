@@ -199,24 +199,28 @@ class PrivilegedRemoteWorker: Binder() {
 
         // 1. Create managed profile via shell.
         val createCmd = "pm create-user --profileOf $parentUserId --managed PrismSpace 2>&1"
-        val createOutput = execShell(createCmd)
-        DiagnosticLog.i(TAG, "Shell: $createCmd -> $createOutput")
+        val (createOutput, createExit) = execShell(createCmd)
+        DiagnosticLog.i(TAG, "Shell: $createCmd -> exit=$createExit output=$createOutput")
+        if (createExit != 0) {
+            DiagnosticLog.e(TAG, "pm create-user failed exit=$createExit: $createOutput", null)
+            return -1
+        }
 
         val userId = parseUserIdFromShellOutput(createOutput) ?: run {
-            DiagnosticLog.e(TAG, "Failed to create managed profile via shell: $createOutput", null)
+            DiagnosticLog.e(TAG, "Failed to parse userId from: $createOutput", null)
             return -1
         }
         DiagnosticLog.i(TAG, "Created managed profile userId=$userId")
 
         // 2. Set profile owner via DPM shell command.
         val dpmCmd = "dpm set-profile-owner --user $userId $adminFlat 2>&1"
-        val dpmOutput = execShell(dpmCmd)
-        DiagnosticLog.i(TAG, "Shell: $dpmCmd -> $dpmOutput")
+        val (dpmOutput, dpmExit) = execShell(dpmCmd)
+        DiagnosticLog.i(TAG, "Shell: $dpmCmd -> exit=$dpmExit output=$dpmOutput")
 
         // 3. Start the new user.
         val startCmd = "am start-user $userId 2>&1"
-        val startOutput = execShell(startCmd)
-        DiagnosticLog.i(TAG, "Shell: $startCmd -> $startOutput")
+        val (startOutput, startExit) = execShell(startCmd)
+        DiagnosticLog.i(TAG, "Shell: $startCmd -> exit=$startExit output=$startOutput")
 
         return userId
     }
@@ -284,7 +288,7 @@ class PrivilegedRemoteWorker: Binder() {
      * Used for managed-profile setup: `pm create-user --profileOf ... --managed`,
      * `pm install --user ...`, `dpm set-profile-owner`, `am start-user`.
      */
-    private fun execShell(command: String): String {
+    private fun execShell(command: String): Pair<String, Int> {
         val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
         // Read stdout and stderr concurrently to avoid deadlock when the OS pipe
         // buffer fills on one stream while we're blocked reading the other.
@@ -296,7 +300,7 @@ class PrivilegedRemoteWorker: Binder() {
         val exitCode = process.waitFor()
         stderrThread.join(2000)
         DiagnosticLog.i(TAG, "execShell done exit=$exitCode stdout=${stdout.take(200)}")
-        return stdout
+        return stdout to exitCode
     }
 
     init { DiagnosticLog.i(TAG, "Running in privileged service...") }
