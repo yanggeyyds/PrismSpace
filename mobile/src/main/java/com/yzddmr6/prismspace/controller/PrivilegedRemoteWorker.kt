@@ -83,9 +83,11 @@ class PrivilegedRemoteWorker: Binder() {
 
     /** Quick probe: can this context create a per-user package context? */
     private fun hasCrossUserAccess(context: Context): Boolean = try {
-        context.createPackageContextAsUser(context.packageName, 0, android.os.Process.myUserHandle())
+        val method = Context::class.java.getMethod(
+            "createPackageContextAsUser", String::class.java, Int::class.java, UserHandle::class.java)
+        method.invoke(context, context.packageName, 0, android.os.Process.myUserHandle())
         true
-    } catch (_: SecurityException) {
+    } catch (_: Exception) {
         false
     }
 
