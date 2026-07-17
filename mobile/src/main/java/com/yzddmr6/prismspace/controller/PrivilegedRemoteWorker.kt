@@ -109,7 +109,7 @@ class PrivilegedRemoteWorker: Binder() {
             val command = data.readString()
             DiagnosticLog.i(TAG, "exec shell: $command")
             try {
-                val result = execShell(command ?: "")
+                val (result, _) = execShell(command ?: "")
                 reply?.writeString(result)
             } catch (e: Exception) {
                 DiagnosticLog.e(TAG, "exec shell failed", e)
