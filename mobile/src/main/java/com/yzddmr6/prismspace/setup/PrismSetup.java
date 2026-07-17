@@ -186,8 +186,12 @@ public class PrismSetup {
 				@Override public void onServiceDisconnected(ComponentName name) { latch.countDown(); }
 			};
 
-			dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class)
-					.invoke(null, args, conn);
+			final java.lang.reflect.Method bindUserService =
+					dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class);
+			if (!(boolean) bindUserService.invoke(null, args, conn)) {
+				com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku bindUserService returned false");
+				return -1;
+			}
 			latch.await(120, java.util.concurrent.TimeUnit.SECONDS);
 			return output.get();
 		} catch (Exception e) {
