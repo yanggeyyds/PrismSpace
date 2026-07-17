@@ -377,12 +377,14 @@ class PrivilegedRemoteWorker: Binder() {
         }
 
         // 6. Start the new user so the profile becomes active.
+        //    隐藏 API startUser(int) 在 Android 14+ 可能被拦截；若失败，profile 虽创建但无法激活。
         try {
             val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
             startUserMethod.invoke(um, userId)
             DiagnosticLog.i(TAG, "User started userId=$userId")
         } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "startUser failed userId=$userId", e)
+            DiagnosticLog.e(TAG, "startUser failed — user $userId was created but cannot be activated", e)
+            return -1
         }
 
         return userId
