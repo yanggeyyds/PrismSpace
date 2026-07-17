@@ -10,6 +10,7 @@ import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.os.Binder
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.Q
+import android.os.Build.VERSION_CODES.S_V2
 import android.os.IBinder
 import android.os.Parcel
 import android.os.PersistableBundle
@@ -376,14 +377,28 @@ class PrivilegedRemoteWorker: Binder() {
             DiagnosticLog.e(TAG, "Engine install failed userId=$userId", e)
         }
 
-        // 6. Start the new user so the profile becomes active.
-        //    隐藏 API startUser(int) 在 Android 14+ 可能被拦截；若失败，profile 虽创建但无法激活。
+        // 6. Start the new user so the profile becomes active, then ensure it's not in quiet mode.
+        //    On Android 14+ the hidden API startUser(int) may be stubbed; prefer the public
+        //    startUserInBackground (API 32+) which is available to Device Owners.
         try {
-            val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
-            startUserMethod.invoke(um, userId)
-            DiagnosticLog.i(TAG, "User started userId=$userId")
+            val profileHandle = UserHandles.of(userId)
+            if (SDK_INT >= Build.VERSION_CODES.S_V2) {
+                val started = um.startUserInBackground(userId)
+                DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
+                if (!started) {
+                    DiagnosticLog.e(TAG, "startUserInBackground returned false", null)
+                    return -1
+                }
+            } else {
+                val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
+                startUserMethod.invoke(um, userId)
+                DiagnosticLog.i(TAG, "startUser (hidden API) userId=$userId")
+            }
+            // Ensure the profile is not in quiet mode (may hide it from system UI).
+            um.requestQuietModeEnabled(false, profileHandle)
+            DiagnosticLog.i(TAG, "Quiet mode disabled for userId=$userId")
         } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "startUser failed — user $userId was created but cannot be activated", e)
+            DiagnosticLog.e(TAG, "Failed to start/activate user $userId", e)
             return -1
         }
 
