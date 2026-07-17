@@ -11,6 +11,7 @@ import android.os.Binder
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.Q
 import android.os.Build.VERSION_CODES.S_V2
+import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
 import android.os.PersistableBundle
@@ -300,29 +301,35 @@ class PrivilegedRemoteWorker: Binder() {
             return -1
         }
 
-        // 3. Snapshot existing profiles before createAndManageUser, so we can verify the
+        // 3. Snapshot existing profiles before creating the profile, so we can verify the
         //    new profile was actually created (hidden API may be silently stubbed on newer OS).
         val usersBefore = um.userProfiles.map { it.hashCode() }.toSet()
 
-        // 4. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
-        //    DPM will:
-        //    a) create the managed-profile user
-        //    b) install the profile owner's package (PrismSpace/engine) into the new user if needed
-        //    c) set the profile owner to prismAdmin
-        //    flags = 2 (SKIP_SETUP_WIZARD) so the new profile doesn't show a setup wizard.
+        // 4. Create managed profile + set profile owner via DPM.
+        //    On API 34+ use createManagedProfile (the new API); on API 33- fall back to
+        //    createAndManageUser (deprecated in API 34, may be stubbed).
         val userHandle: UserHandle? = try {
-            val createMethod = DevicePolicyManager::class.java.getMethod(
-                "createAndManageUser",
-                ComponentName::class.java, String::class.java, ComponentName::class.java,
-                PersistableBundle::class.java, Int::class.javaPrimitiveType
-            )
-            createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
+            if (SDK_INT >= 34) {
+                val createMethod = DevicePolicyManager::class.java.getMethod(
+                    "createManagedProfile",
+                    ComponentName::class.java, String::class.java, ComponentName::class.java,
+                    Bundle::class.java
+                )
+                createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, null) as? UserHandle
+            } else {
+                val createMethod = DevicePolicyManager::class.java.getMethod(
+                    "createAndManageUser",
+                    ComponentName::class.java, String::class.java, ComponentName::class.java,
+                    PersistableBundle::class.java, Int::class.javaPrimitiveType
+                )
+                createMethod.invoke(dpm, deviceOwnerAdmin, "PrismSpace", prismAdmin, PersistableBundle(), 2) as? UserHandle
+            }
         } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "createAndManageUser failed (admin=$deviceOwnerAdmin profileOwner=$prismAdmin)", e)
+            DiagnosticLog.e(TAG, "createManagedProfile/createAndManageUser failed (admin=$deviceOwnerAdmin profileOwner=$prismAdmin)", e)
             null
         }
         if (userHandle == null) {
-            DiagnosticLog.e(TAG, "createAndManageUser returned null")
+            DiagnosticLog.e(TAG, "createManagedProfile returned null")
             return -1
         }
 
@@ -333,7 +340,7 @@ class PrivilegedRemoteWorker: Binder() {
             DiagnosticLog.e(TAG, "Failed to get user id from UserHandle", e)
             return -1
         }
-        DiagnosticLog.i(TAG, "createAndManageUser returned userId=$userId")
+        DiagnosticLog.i(TAG, "createManagedProfile returned userId=$userId")
 
         // Verify the new profile actually exists in the user list. On Android 14+ the hidden API
         // may be silently stubbed (returns a fake UserHandle without creating a profile), in which
@@ -341,7 +348,7 @@ class PrivilegedRemoteWorker: Binder() {
         val usersAfter = um.userProfiles.map { it.hashCode() }.toSet()
         val newUsers = usersAfter - usersBefore
         if (userId !in newUsers) {
-            DiagnosticLog.e(TAG, "createAndManageUser stub detected: returned userId=$userId but no new user appeared (before=$usersBefore after=$usersAfter new=$newUsers)", null)
+            DiagnosticLog.e(TAG, "createManagedProfile stub detected: returned userId=$userId but no new user appeared (before=$usersBefore after=$usersAfter new=$newUsers)", null)
             return -1
         }
         DiagnosticLog.i(TAG, "Verified new managed profile userId=$userId")
@@ -378,33 +385,24 @@ class PrivilegedRemoteWorker: Binder() {
         }
 
         // 6. Start the new user so the profile becomes active, then ensure it's not in quiet mode.
-        //    On Android 14+ the hidden API startUser(int) may be stubbed; prefer the public
-        //    startUserInBackground (API 32+) which is available to Device Owners.
-        try {
-            val profileHandle = UserHandles.of(userId)
-            if (SDK_INT >= S_V2) {
-                // startUserInBackground is @SystemApi — use reflection.
-                try {
-                    val startMethod = UserManager::class.java.getMethod("startUserInBackground", Int::class.javaPrimitiveType)
-                    val started = startMethod.invoke(um, userId) as Boolean
-                    DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
-                    if (!started) { DiagnosticLog.e(TAG, "startUserInBackground returned false", null); return -1 }
-                } catch (e: Exception) {
-                    DiagnosticLog.e(TAG, "startUserInBackground failed userId=$userId", e)
-                    return -1
-                }
-            } else {
+        //    These are best-effort — the profile exists regardless. Hidden APIs may be stubbed
+        //    on Android 14+, so failures are logged but not fatal.
+        val profileHandle = UserHandles.of(userId)
+        if (SDK_INT >= S_V2) {
+            runCatching {
+                val startMethod = UserManager::class.java.getMethod("startUserInBackground", Int::class.javaPrimitiveType)
+                val started = startMethod.invoke(um, userId) as Boolean
+                DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
+            }.onFailure { DiagnosticLog.w(TAG, "startUserInBackground failed userId=$userId", it) }
+        } else {
+            runCatching {
                 val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
                 startUserMethod.invoke(um, userId)
                 DiagnosticLog.i(TAG, "startUser (hidden API) userId=$userId")
-            }
-            // Ensure the profile is not in quiet mode (may hide it from system UI).
-            um.requestQuietModeEnabled(false, profileHandle)
-            DiagnosticLog.i(TAG, "Quiet mode disabled for userId=$userId")
-        } catch (e: Exception) {
-            DiagnosticLog.e(TAG, "Failed to start/activate user $userId", e)
-            return -1
+            }.onFailure { DiagnosticLog.w(TAG, "startUser failed userId=$userId", it) }
         }
+        runCatching { um.requestQuietModeEnabled(false, profileHandle) }
+            .onFailure { DiagnosticLog.w(TAG, "requestQuietModeEnabled failed userId=$userId", it) }
 
         return userId
     }
