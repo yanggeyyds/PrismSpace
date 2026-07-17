@@ -189,7 +189,7 @@ public class PrismSetup {
 			final java.lang.reflect.Method bindUserService =
 					dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class);
 			if (!(boolean) bindUserService.invoke(null, args, conn)) {
-				com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku bindUserService returned false");
+				com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku bindUserService returned false", null);
 				return -1;
 			}
 			latch.await(120, java.util.concurrent.TimeUnit.SECONDS);
