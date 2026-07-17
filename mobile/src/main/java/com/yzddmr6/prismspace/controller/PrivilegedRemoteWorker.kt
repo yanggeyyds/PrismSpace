@@ -273,9 +273,12 @@ class PrivilegedRemoteWorker: Binder() {
      *
      * Steps:
      * 1. Find Device Owner admin via getActiveAdmins() (public API)
-     * 2. createAndManageUser — creates managed profile + sets PrismSpace as profile owner.
+     * 2. Snapshot existing profiles to detect hidden API stub
+     * 3. createAndManageUser — creates managed profile + sets PrismSpace as profile owner.
      *    DPM internally installs the profile owner's package into the new user if not present.
-     * 3. Start the new user.
+     * 4. Verify the new profile actually appeared in userProfiles
+     * 5. Install engine into the new profile
+     * 6. Start the new user.
      * Returns the new user id (≥0) on success, or -1 on failure.
      */
     private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
@@ -296,7 +299,11 @@ class PrivilegedRemoteWorker: Binder() {
             return -1
         }
 
-        // 3. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
+        // 3. Snapshot existing profiles before createAndManageUser, so we can verify the
+        //    new profile was actually created (hidden API may be silently stubbed on newer OS).
+        val usersBefore = um.userProfiles.map { it.hashCode() }.toSet()
+
+        // 4. Create managed profile + set profile owner via DPM.createAndManageUser (hidden API).
         //    DPM will:
         //    a) create the managed-profile user
         //    b) install the profile owner's package (PrismSpace/engine) into the new user if needed
@@ -325,9 +332,20 @@ class PrivilegedRemoteWorker: Binder() {
             DiagnosticLog.e(TAG, "Failed to get user id from UserHandle", e)
             return -1
         }
-        DiagnosticLog.i(TAG, "Created managed profile userId=$userId")
+        DiagnosticLog.i(TAG, "createAndManageUser returned userId=$userId")
 
-        // 4. Ensure engine is installed in the new profile (createAndManageUser may already do this,
+        // Verify the new profile actually exists in the user list. On Android 14+ the hidden API
+        // may be silently stubbed (returns a fake UserHandle without creating a profile), in which
+        // case userProfiles won't contain the returned userId.
+        val usersAfter = um.userProfiles.map { it.hashCode() }.toSet()
+        val newUsers = usersAfter - usersBefore
+        if (userId !in newUsers) {
+            DiagnosticLog.e(TAG, "createAndManageUser stub detected: returned userId=$userId but no new user appeared (before=$usersBefore after=$usersAfter new=$newUsers)", null)
+            return -1
+        }
+        DiagnosticLog.i(TAG, "Verified new managed profile userId=$userId")
+
+        // 5. Ensure engine is installed in the new profile (createAndManageUser may already do this,
         //    but verify + install as fallback — needed on some Android versions).
         try {
             val profileContext = ContextShuttle.createContextAsUser(context, UserHandles.of(userId))
@@ -358,7 +376,7 @@ class PrivilegedRemoteWorker: Binder() {
             DiagnosticLog.e(TAG, "Engine install failed userId=$userId", e)
         }
 
-        // 5. Start the new user so the profile becomes active.
+        // 6. Start the new user so the profile becomes active.
         try {
             val startUserMethod = UserManager::class.java.getMethod("startUser", Int::class.javaPrimitiveType)
             startUserMethod.invoke(um, userId)
