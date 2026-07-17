@@ -382,11 +382,15 @@ class PrivilegedRemoteWorker: Binder() {
         //    startUserInBackground (API 32+) which is available to Device Owners.
         try {
             val profileHandle = UserHandles.of(userId)
-            if (SDK_INT >= Build.VERSION_CODES.S_V2) {
-                val started = um.startUserInBackground(userId)
-                DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
-                if (!started) {
-                    DiagnosticLog.e(TAG, "startUserInBackground returned false", null)
+            if (SDK_INT >= S_V2) {
+                // startUserInBackground is @SystemApi — use reflection.
+                try {
+                    val startMethod = UserManager::class.java.getMethod("startUserInBackground", Int::class.javaPrimitiveType)
+                    val started = startMethod.invoke(um, userId) as Boolean
+                    DiagnosticLog.i(TAG, "startUserInBackground userId=$userId result=$started")
+                    if (!started) { DiagnosticLog.e(TAG, "startUserInBackground returned false", null); return -1 }
+                } catch (e: Exception) {
+                    DiagnosticLog.e(TAG, "startUserInBackground failed userId=$userId", e)
                     return -1
                 }
             } else {
