@@ -152,20 +152,19 @@ public class PrismSetup {
 	private static Integer execDhizukuSetup(final Context context, final String adminFlat,
 			final int parentUserId, final String enginePkg) {
 		try {
-			if (!com.rosan.dhizuku.api.Dhizuku.init(context.getApplicationContext())) return -1;
+			final Class<?> dhizukuClass = Class.forName("com.rosan.dhizuku.api.Dhizuku");
+			final Class<?> argsClass = Class.forName("com.rosan.dhizuku.api.DhizukuUserServiceArgs");
+			final java.lang.reflect.Method init = dhizukuClass.getMethod("init", Context.class);
+			if (!(boolean) init.invoke(null, context.getApplicationContext())) return -1;
 
 			final ComponentName component = new ComponentName(context, com.yzddmr6.prismspace.controller.PrivilegedRemoteWorker.class);
-			final com.rosan.dhizuku.api.DhizukuUserServiceArgs args =
-					new com.rosan.dhizuku.api.DhizukuUserServiceArgs(component);
+			final Object args = argsClass.getConstructor(ComponentName.class).newInstance(component);
 
 			final java.util.concurrent.atomic.AtomicReference<Integer> output = new java.util.concurrent.atomic.AtomicReference<>(-1);
 			final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
 			final android.content.ServiceConnection conn = new android.content.ServiceConnection() {
 				@Override public void onServiceConnected(ComponentName name, final android.os.IBinder service) {
-					// onServiceConnected is delivered on the main thread; the transact is a synchronous
-					// IPC that can block while system_server creates the user and installs the package.
-					// Run on a worker thread to avoid ANR.
 					new Thread(() -> {
 						try {
 							final android.os.Parcel data = android.os.Parcel.obtain();
@@ -179,7 +178,7 @@ public class PrismSetup {
 							com.yzddmr6.prismspace.analytics.DiagnosticLog.INSTANCE.e("PrismSetup", "Dhizuku setup transact failed", e);
 						} finally {
 							latch.countDown();
-							try { com.rosan.dhizuku.api.Dhizuku.unbindUserService(this); }
+							try { dhizukuClass.getMethod("unbindUserService", android.content.ServiceConnection.class).invoke(null, this); }
 							catch (Exception ignored) {}
 						}
 					}, "DhizukuSetup").start();
@@ -187,7 +186,8 @@ public class PrismSetup {
 				@Override public void onServiceDisconnected(ComponentName name) { latch.countDown(); }
 			};
 
-			com.rosan.dhizuku.api.Dhizuku.bindUserService(args, conn);
+			dhizukuClass.getMethod("bindUserService", argsClass, android.content.ServiceConnection.class)
+					.invoke(null, args, conn);
 			latch.await(120, java.util.concurrent.TimeUnit.SECONDS);
 			return output.get();
 		} catch (Exception e) {
