@@ -8,6 +8,7 @@ import android.content.pm.PackageManager.INSTALL_REASON_USER
 import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.os.Binder
 import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.os.IBinder
 import android.os.Parcel
 import android.os.UserHandle
@@ -174,6 +175,57 @@ class PrivilegedRemoteWorker: Binder() {
             return true
         }
         return super.onTransact(code, data, reply, flags)
+    }
+
+    /**
+     * Create a managed profile and set up PrismSpace as profile owner via shell commands.
+     *
+     * Unlike the root path (shell UID), this runs in the Dhizuku server process at application UID
+     * (Device Owner). The `pm`/`dpm`/`am` tools communicate with system services via Binder, where
+     * the caller's UID is Dhizuku's app UID. Some commands (notably `pm create-user`) require
+     * `CREATE_USERS` permission which Dhizuku doesn't have — but on many Android 14+ ROMs,
+     * the Device Owner status is sufficient for the underlying service to allow the operation.
+     *
+     * Steps:
+     * 1. `pm create-user --profileOf <parent> --managed PrismSpace`
+     * 2. Parse userId from output
+     * 3. [engine install handled by createAndManageUser or separately]
+     * 4. `dpm set-profile-owner --user <id> <adminFlat>`
+     * 5. `am start-user <id>`
+     * Returns the new user id (≥0) on success, or -1 on failure.
+     */
+    private fun setupManagedProfile(context: Context, adminFlat: String, parentUserId: Int, enginePkg: String): Int {
+        DiagnosticLog.i(TAG, "setupManagedProfile admin=$adminFlat parent=$parentUserId engine=$enginePkg")
+
+        // 1. Create managed profile via shell.
+        val createCmd = "pm create-user --profileOf $parentUserId --managed PrismSpace 2>&1"
+        val createOutput = execShell(createCmd)
+        DiagnosticLog.i(TAG, "Shell: $createCmd -> $createOutput")
+
+        val userId = parseUserIdFromShellOutput(createOutput) ?: run {
+            DiagnosticLog.e(TAG, "Failed to create managed profile via shell: $createOutput", null)
+            return -1
+        }
+        DiagnosticLog.i(TAG, "Created managed profile userId=$userId")
+
+        // 2. Set profile owner via DPM shell command.
+        val dpmCmd = "dpm set-profile-owner --user $userId $adminFlat 2>&1"
+        val dpmOutput = execShell(dpmCmd)
+        DiagnosticLog.i(TAG, "Shell: $dpmCmd -> $dpmOutput")
+
+        // 3. Start the new user.
+        val startCmd = "am start-user $userId 2>&1"
+        val startOutput = execShell(startCmd)
+        DiagnosticLog.i(TAG, "Shell: $startCmd -> $startOutput")
+
+        return userId
+    }
+
+    /** Extract userId from `pm create-user` or `cmd` output (various formats). */
+    private fun parseUserIdFromShellOutput(output: String): Int? {
+        val cleaned = output.trim()
+        val idMatch = Regex("""(\d+)""").find(cleaned)
+        return idMatch?.groupValues?.get(1)?.toIntOrNull()
     }
 
     private fun scheduleProcessExit() {
